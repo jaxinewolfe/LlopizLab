@@ -9,7 +9,7 @@
 library(tidyverse)
 
 # Set working directory
-setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/FOLFE")
+setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance")
 
 # Load trial stomach content data
 # Data is in long format

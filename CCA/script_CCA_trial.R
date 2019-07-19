@@ -5,71 +5,151 @@
 
 ## Goal: Generate a CCA of the diet composition of each fish species per LTER cruise
 
-# Background: 
-# data are in proportions 
-# sample data - Arctic cod 
+# Overview: 
+# Data is merged from fisheries datasets to define daynight and season explanatory vars
+# prey counts are converted proportions 
 # the df is split into a matrix of predictors and responses (diet proportions)
 # any fish without any diet data, unknowns, other are removed
 
-##------------------------------
+
+# Setup -------------------------------------------------------------------
+
+rm(list = ls())
 
 # load necessary libraries
 library(tidyverse)
 library(CCA)
-# library(car)
+library(lubridate)
 library(vegan)
 
-setwd("D:/Arctic/Bsaida_Gut_Content_Data")
-Bsaida_data <- read.csv("Bsaida_2017_CCA_190128.csv", header=TRUE)
+# set working directory
+setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA")
+
+# load necessary dataset
+dietdata <- read_csv("Forage_Fish_Diet_Data_2013_2015_Final.csv")
+dietdata[is.na(dietdata)] <- 0 # convert empties to 0
+
+
+# Data Wrangling ----------------------------------------------------------
+
+
+## Wide to Long Conversion ##
+
+diet.long <- dietdata %>%
+  gather(preytype,count,Centropages_spp:Unknown,factor_key = TRUE) %>%
+  filter(count != 0)
+
+## Merging Fisheries Cruise data files ##
+# Combine spring and fall cruise datasets to be merged with the diet data
+
+# script for file merging modified from following link:
+# https://psychwire.wordpress.com/2011/06/03/merge-all-files-in-a-directory-using-r-into-a-single-dataframe/
+
+setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA/FSCSTables_SVSTA/")
+# create list of files in the working directory
+file_list <- list.files()
+# Define columns to be extracted from fisheries data
+FSCScols <- c("CRUISE6", "STATION", "EST_YEAR", "EST_MONTH", "EST_DAY", "EST_TIME",
+              "GMT_YEAR", "GMT_MONTH", "GMT_DAY", "GMT_TIME", "SURFTEMP", "BOTTEMP")
+
+# 
+for (file in file_list){
+  # if the merged FSCSdataset doesn't exist, create it
+  if (!exists("FSCSdataset")){
+    FSCSdataset <- read_csv(file) %>%
+      select(FSCScols)
+  }
+  
+  # if the merged dataset does exist, append to it
+  if (exists("FSCSdataset")){
+    # create temperary dataset to ammend the FSCSdataset
+    temp_dataset <-read_csv(file) %>%
+      select(FSCScols)
+    FSCSdataset <- rbind(FSCSdataset, temp_dataset[, colnames(FSCSdataset)])
+    FSCSdataset[is.na(FSCSdataset)] <- "NA" # convert empties to NA
+    rm(temp_dataset)
+  }
+}
+
+
+## Merging Diet and Cruise Datasets ##
+
+# Prep to merge: Standardize the character layout for time
+
+# Adjust Time column of dietdata: convert to %H:%M format
+# Rewrite time column in diet dataset
+dietdata$Time <- format(as.POSIXct(str_pad(dietdata$Time, 4, pad = "0"), 
+                                   format="%H%M", origin = ""), "%H:%M")
+# Do the same for the fisheries data
+# FSCSdataset$EST_TIME <- format(as.POSIXct(str_pad(FSCSdataset$EST_TIME, 8, pad = "0"), 
+                                          # format = "%H:%M:%S", origin = ""), "%H:%M")
+
+# Merge datasets
+# use unique to remove duplicate rows
+diet_join <- unique(left_join(x = dietdata, y = FSCSdataset, 
+                       by = c("Cruise" = "CRUISE6", "Station" = "STATION")))
+
+# isolate missing fisheries cruise_stations
+missing <- diet_join[is.na(diet_join$EST_DAY),]
+write_csv(missing,"FISHERIES_MIA.csv")
+
+# add column with datetime
+diet_join$datetime <- with(diet_join, ymd_hms(paste(GMT_YEAR, GMT_MONTH, GMT_DAY, GMT_TIME, sep= ' '),
+                                             tz = ""))
+# eliminate rows with NA for datetime (25 total)
+diet_join <- diet_join[complete.cases(diet_join[ , "datetime"]),]
+
+
+## Calculating Day and Night ##
+
+# function creates a vector indicating day vs. night based on sunrise and sunset
+# requires that data frame have Longitude, Latitude, and datetime columns
+daynight <- function(x) {
+  crds <- SpatialPoints(matrix(c(x$Longitude, x$Latitude), ncol = 2, byrow = TRUE),
+                        proj4string=CRS("+proj=longlat +datum=WGS84"))
+  ts <- x$datetime
+  sunrise <- sunriset(crds, ts, POSIXct.out = TRUE,
+                           direction = "sunrise")$time
+  sunset <- sunriset(crds, ts, POSIXct.out = TRUE,
+                               direction = "sunset")$time
+  # use 'ifelse'  to create vector indicating day vs. night based on sunrise and sunset
+  daynight <- ifelse(ts >= sunrise & ts <= sunset,
+                   yes = "Day", no = "Night")
+  print(sunrise)
+  print(sunset)
+  return(daynight)
+}
+
+# add daynight  column to auk dataset in order to compare observations
+diet_join$day_night <- daynight(diet_join)
+
+
+## Define Seasons ##
+diet_join$seasons <- ifelse((diet_join$EST_MONTH == 3 | diet_join$EST_MONTH == 4 |
+                            diet_join$EST_MONTH == 5), yes = "Spring", no = "Fall")
+
+
+# Canonical Correspondence Analysis ---------------------------------------
+
+# Aggregate data based on groupings of explanatory variables
+dietsp <- diet_join %>%
+  group_by(Region,day_night, seasons, Station_Depth,SURFTEMP,BOTTEMP) %>%
+  # Create species-specific data frame
+  filter(Species == "A. aestivalis" & day_night != "NA") %>%
+  summarise_at(vars(Centropages_spp:Unknown), sum) %>%
+  mutate(preytotal = rowSums(.[,"Centropages_spp":ncol(.)]), na.rm = TRUE)
+
+  # mutate(preytotal = rowSums(select(.,"Centropages_spp":"Unknown")), na.rm = TRUE)
 
 # this transformation is common in diet studies for proportion 
 trans.arcsine <- function(x){
   asin(sign(x) * sqrt(abs(x)))
 }
 
-# set your predictors (meta-data)
-# fork length, longitude, and dept of 34.5 isohaline
-Pred <- Bsaida_data[,1:3] 
-# set your prey items 
-Diet <- Bsaida_data[,4:12]
-# transform your prey data 
-DietArc <- trans.arcsine(Diet)
-
-# CCA
-# create a "full" model with all predictors 
-# y ~ x 
-# the dot means "any columns from data that are otherwise not used"
-CCA_Bsaida <- cca(DietArc~., Pred)
-# make a null model
-mod0 <- cca(DietArc~1,Pred)
-# perform a stepwise selection of predictors through permuatation tests against the null model
-New_CCA <- step(mod0, scope = formula(CCA_Bsaida), test = "perm", perm.max = 100)
-
-# plot the results 
-tiff("B_saida_CCA_190201.tiff",width = 8, height = 6, res = 200, units = "in")
-plot(New_CCA, display = c("sp","bp"), xlim = c(-2,3.5), ylim = c(-2,2))
-dev.off() # returns the number and name of the new active device
-anova(New_CCA)
-
-
-## Trial CCA using Jutin's data ####
-
-dietdata <- read_csv("Forage_Fish_Diet_Data_2013_2015_Final.csv")
-dietdata[is.na(dietdata)] <- 0 # convert empties to 0
-
-# Add columns for Day/Night, Season
-
-# Aggregate data based on groupings of explanatory variables
-dietagg <- dietdata %>%
-  group_by(Cruise,Station_Depth,Region,Species) %>%
-  summarise_at(vars(Centropages_spp:Unknown), sum) 
-# Create species-specific data frame
-dietsp <- dietagg %>% filter(Species == "P. triacanthus")
-
 # isolate predictors 
-predictors <- select(dietsp, c("Cruise", "Station_Depth", "Region"))
+predictors <- select(dietsp, c("Station_Depth","Region", "SURFTEMP","BOTTEMP","seasons"))
 # isolate diet info
-prey <- dietsp[,5:ncol(dietsp)]
+prey <- dietsp[,7:ncol(dietsp)]
 # create vector of prey count totals per row
 preytotal <- rowSums(prey)
 # convert counts to proportions
@@ -89,8 +169,10 @@ CCA_null <- cca(preyarc~1,predictors)
 # perform a stepwise selection of predictors through permuatation tests against the null model
 CCA_final <- step(CCA_null, scope = formula(CCA_full), test = "perm", perm.max = 100)
 
-# plot the results 
+# plot the results
 # tiff("B_saida_CCA_190201.tiff",width = 8, height = 6, res = 200, units = "in")
 plot(CCA_final, display = c("sp","bp"))
 dev.off() # returns the number and name of the new active device
 anova(New_CCA)
+
+# I left out prey categories that averaged less than 5% by number  in the diet of each species
