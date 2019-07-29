@@ -11,6 +11,7 @@
 # the df is split into a matrix of predictors and responses (diet proportions)
 # any fish without any diet data, unknowns, other are removed
 
+# This script requires a folder of fisheries trawl data and the SCA data
 
 # Setup -------------------------------------------------------------------
 
@@ -21,6 +22,10 @@ library(tidyverse)
 library(CCA)
 library(lubridate)
 library(vegan)
+library(stringr)
+library(maptools)
+
+# Data Wrangling ----------------------------------------------------------
 
 # set working directory
 setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA")
@@ -29,21 +34,15 @@ setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA")
 dietdata <- read_csv("Forage_Fish_Diet_Data_2013_2015_Final.csv")
 dietdata[is.na(dietdata)] <- 0 # convert empties to 0
 
-
-# Data Wrangling ----------------------------------------------------------
-
-
 ## Wide to Long Conversion ##
 
 diet.long <- dietdata %>%
   gather(preytype,count,Centropages_spp:Unknown,factor_key = TRUE) %>%
   filter(count != 0)
+# write.csv(diet.long, "Forage_Fish_Diet_Data_2013_2015_Final_long.csv")
 
 ## Merging Fisheries Cruise data files ##
 # Combine spring and fall cruise datasets to be merged with the diet data
-
-# script for file merging modified from following link:
-# https://psychwire.wordpress.com/2011/06/03/merge-all-files-in-a-directory-using-r-into-a-single-dataframe/
 
 setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA/FSCSTables_SVSTA/")
 # create list of files in the working directory
@@ -52,23 +51,18 @@ file_list <- list.files()
 FSCScols <- c("CRUISE6", "STATION", "EST_YEAR", "EST_MONTH", "EST_DAY", "EST_TIME",
               "GMT_YEAR", "GMT_MONTH", "GMT_DAY", "GMT_TIME", "SURFTEMP", "BOTTEMP")
 
-# 
-for (file in file_list){
-  # if the merged FSCSdataset doesn't exist, create it
-  if (!exists("FSCSdataset")){
-    FSCSdataset <- read_csv(file) %>%
+# Creates merged dataset from the fisheries data
+for (i in 2:length(file_list)){
+
+    FSCSdataset <- read.csv(file_list[1], header = TRUE) %>%
       select(FSCScols)
-  }
   
-  # if the merged dataset does exist, append to it
-  if (exists("FSCSdataset")){
-    # create temperary dataset to ammend the FSCSdataset
-    temp_dataset <-read_csv(file) %>%
+    # create temporary dataset to ammend the FSCSdataset
+    temp_dataset <-read.csv(file_list[i], header = TRUE) %>%
       select(FSCScols)
     FSCSdataset <- rbind(FSCSdataset, temp_dataset[, colnames(FSCSdataset)])
     FSCSdataset[is.na(FSCSdataset)] <- "NA" # convert empties to NA
     rm(temp_dataset)
-  }
 }
 
 
@@ -94,10 +88,12 @@ missing <- diet_join[is.na(diet_join$EST_DAY),]
 write_csv(missing,"FISHERIES_MIA.csv")
 
 # add column with datetime
-diet_join$datetime <- with(diet_join, ymd_hms(paste(GMT_YEAR, GMT_MONTH, GMT_DAY, GMT_TIME, sep= ' '),
-                                             tz = ""))
+diet_join$GMT_datetime <- with(diet_join, ymd_hms(paste(GMT_YEAR, GMT_MONTH, GMT_DAY, GMT_TIME, sep= ' '),
+                                             tz = "GMT"))
+diet_join$EST_datetime <- with(diet_join, ymd_hms(paste(EST_YEAR, EST_MONTH, EST_DAY, EST_TIME, sep= ' '),
+                                                  tz = "EST"))
 # eliminate rows with NA for datetime (25 total)
-diet_join <- diet_join[complete.cases(diet_join[ , "datetime"]),]
+diet_join <- diet_join[complete.cases(diet_join[ , "GMT_datetime"]),]
 
 
 ## Calculating Day and Night ##
@@ -107,22 +103,27 @@ diet_join <- diet_join[complete.cases(diet_join[ , "datetime"]),]
 daynight <- function(x) {
   crds <- SpatialPoints(matrix(c(x$Longitude, x$Latitude), ncol = 2, byrow = TRUE),
                         proj4string=CRS("+proj=longlat +datum=WGS84"))
-  ts <- x$datetime
+  ts <- x$EST_datetime
   sunrise <- sunriset(crds, ts, POSIXct.out = TRUE,
                            direction = "sunrise")$time
   sunset <- sunriset(crds, ts, POSIXct.out = TRUE,
                                direction = "sunset")$time
   # use 'ifelse'  to create vector indicating day vs. night based on sunrise and sunset
-  daynight <- ifelse(ts >= sunrise & ts <= sunset,
+  day_night <- ifelse(ts >= sunrise & ts <= sunset,
                    yes = "Day", no = "Night")
   print(sunrise)
   print(sunset)
-  return(daynight)
+
+  return(day_night)
 }
 
-# add daynight  column to auk dataset in order to compare observations
+# add daynight column to dataset in order to compare observations
 diet_join$day_night <- daynight(diet_join)
+diet_join <- diet_join[complete.cases(diet_join[ , "day_night"]),]
 
+# isolate missing fisheries cruise_stations
+# mia_daynight <- diet_final[is.na(diet_final$day_night),]
+# write_csv(mia_daynight, "daynight_NAs.csv")
 
 ## Define Seasons ##
 diet_join$seasons <- ifelse((diet_join$EST_MONTH == 3 | diet_join$EST_MONTH == 4 |
@@ -135,10 +136,12 @@ diet_join$seasons <- ifelse((diet_join$EST_MONTH == 3 | diet_join$EST_MONTH == 4
 dietsp <- diet_join %>%
   group_by(Region,day_night, seasons, Station_Depth,SURFTEMP,BOTTEMP) %>%
   # Create species-specific data frame
-  filter(Species == "A. aestivalis" & day_night != "NA") %>%
-  summarise_at(vars(Centropages_spp:Unknown), sum) %>%
-  mutate(preytotal = rowSums(.[,"Centropages_spp":ncol(.)]), na.rm = TRUE)
+  filter(Species == "A. aestivalis") %>%
+  summarise_at(vars(Centropages_spp:Unknown), sum) 
+# %>%
+#   mutate(preytotal = rowSums(.[,"Centropages_spp":ncol(.)]), na.rm = TRUE)
 
+# & day_night != "NA"
   # mutate(preytotal = rowSums(select(.,"Centropages_spp":"Unknown")), na.rm = TRUE)
 
 # this transformation is common in diet studies for proportion 
@@ -147,7 +150,7 @@ trans.arcsine <- function(x){
 }
 
 # isolate predictors 
-predictors <- select(dietsp, c("Station_Depth","Region", "SURFTEMP","BOTTEMP","seasons"))
+predictors <- select(dietsp, c("Region","day_night","seasons","Station_Depth", "SURFTEMP","BOTTEMP"))
 # isolate diet info
 prey <- dietsp[,7:ncol(dietsp)]
 # create vector of prey count totals per row

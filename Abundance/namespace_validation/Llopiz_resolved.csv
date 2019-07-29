@@ -1,0 +1,149 @@
+Llopiz_preytypes,preytype_validated,tsn_id,resolved_names,taxon_level_fromid,taxon_name_fromid,higher_order_fromid,data_source,resolved_id_fromgnr,resolved_taxon_level_fromgnr,resolved_higher_order_fromgnr,name_match,id_match,higher_match,alt_datasource,alt_resolved_name
+Centropages_spp,Centropages,NA,Centropages,NA,NA,NA,ITIS,85761,genus,Centropages,FALSE,FALSE,FALSE,NA,NA
+Calanus_spp,Calanus,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+P P C,PPC,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,PPC
+Temora_longicornis,Temora longicornis,NA,Temora longicornis,NA,NA,NA,ITIS,85877,species,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calanoida,Calanoida,NA,Calanoida,NA,NA,NA,ITIS,85258,order,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Candacia_spp,Candacia,NA,Candacia,NA,NA,NA,ITIS,86020,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Caligus_spp,Caligus,NA,Caligus,NA,NA,NA,ITIS,89009,genus,Other,FALSE,FALSE,FALSE,NA,NA
+Hyperiidea,Hyperiidea,NA,Hyperiidea,NA,NA,NA,ITIS,95107,suborder,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Phronimidae,Phronimidae,NA,Phronimidae,NA,NA,NA,ITIS,95172,family,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Hyperia_spp,Hyperia,NA,Hyperia,NA,NA,NA,ITIS,95109,species,Other,FALSE,FALSE,FALSE,NA,NA
+Parathemisto_spp,Parathemisto,NA,Parathemisto,NA,NA,NA,ITIS,95148,genus,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Pronoidae,Pronoidae,NA,Pronoidae,NA,NA,NA,ITIS,95200,family,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Lycaenidae,Lycaenidae,NA,Lycaenidae,NA,NA,NA,ITIS,117236,family,Other,FALSE,FALSE,FALSE,NA,NA
+Mysidae,Mysidae,NA,Mysidae,NA,NA,NA,ITIS,89856,family,Other,FALSE,FALSE,FALSE,NA,NA
+Mysis mixta,Mysis mixta,NA,Mysis mixta,NA,NA,NA,ITIS,90042,species,Other,FALSE,FALSE,FALSE,NA,NA
+Mysis bigelowi,Mysis bigelowi,NA,Mysis,NA,NA,NA,ITIS,90041,species,Other,FALSE,FALSE,FALSE,NA,NA
+Neomysis spp.,Neomysis,NA,Neomysis,NA,NA,NA,ITIS,90054,genus,Other,FALSE,FALSE,FALSE,NA,NA
+Oikopleura spp.,Oikopleura,NA,Oikopleura,NA,NA,NA,ITIS,159668,class,Appendicularian,FALSE,FALSE,FALSE,NA,NA
+Limacina helicina,Limacina helicina,NA,Limacina helicina,NA,NA,NA,ITIS,76340,species,Other,FALSE,FALSE,FALSE,NA,NA
+Clione limacina,Clione limacina,NA,Clione limacina,NA,NA,NA,ITIS,78089,species,Other,FALSE,FALSE,FALSE,NA,NA
+Euphausiacea,Euphausiacea,NA,Euphausiacea,NA,NA,NA,ITIS,95496,order,Krill,FALSE,FALSE,FALSE,NA,NA
+Euphausia spp.,Euphausia,NA,Euphausia,NA,NA,NA,ITIS,95501,order,Krill,FALSE,FALSE,FALSE,NA,NA
+Meganyctiphanes norvegica,Meganyctiphanes norvegica,NA,Meganyctiphanes norvegica,NA,NA,NA,ITIS,95534,species,Krill,FALSE,FALSE,FALSE,NA,NA
+Thysanopoda spp.,Thysanopoda,NA,Thysanopoda,NA,NA,NA,ITIS,95582,genus,Krill,FALSE,FALSE,FALSE,NA,NA
+Thysanoessa spp.,Thysanoessa,NA,Thysanoessa,NA,NA,NA,ITIS,95571,genus,Krill,FALSE,FALSE,FALSE,NA,NA
+Nematoscelis spp.,Nematoscelis,NA,Nematoscelis,NA,NA,NA,ITIS,95539,genus,Krill,FALSE,FALSE,FALSE,NA,NA
+Gammarus spp.,Gammarus,NA,Gammarus,NA,NA,NA,ITIS,93773,species,Other,FALSE,FALSE,FALSE,NA,NA
+Ampithoidae,Ampithoidae,NA,Ampithoidae,NA,NA,NA,ITIS,93408,family,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Gammaria spp.,Gammarus,NA,Gammarus,NA,NA,NA,ITIS,93773,species,Other,FALSE,FALSE,FALSE,NA,NA
+Haustoriidae,Haustoriidae,NA,Haustoriidae,NA,NA,NA,ITIS,93959,family,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Corophiidae,Corophiidae,NA,Corophiidae,NA,NA,NA,ITIS,93584,family,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Liljeborgiidae,Liljeborgiidae,NA,Liljeborgiidae,NA,NA,NA,ITIS,94205,family,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Meltidae,Melittidae,NA,Melittidae,NA,NA,NA,ITIS,154364,family,Other,FALSE,FALSE,FALSE,NA,NA
+Aoridae,Aoridae,NA,Aoridae,NA,NA,NA,ITIS,93440,family,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Chaetognatha,Chaetognatha,NA,Chaetognatha,NA,NA,NA,ITIS,158650,phylum,Chaetognath,FALSE,FALSE,FALSE,NA,NA
+Ostracoda,Ostracoda,NA,Ostracoda,NA,NA,NA,ITIS,84195,species,Other,FALSE,FALSE,FALSE,NA,NA
+Crustacean_ Larvae,Crustacea,NA,Crustacea,NA,NA,NA,ITIS,83677,species,Other,FALSE,FALSE,FALSE,NA,NA
+Cladocera,Cladocera,NA,Cladocera,NA,NA,NA,ITIS,83832,class,Other,FALSE,FALSE,FALSE,NA,NA
+Ammodytes spp.,Ammodytes,NA,Ammodytes,NA,NA,NA,ITIS,171671,species,Other,FALSE,FALSE,FALSE,NA,NA
+Larval_ Fish,Fish Remains,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Fish Remains
+Fish_ Remains,Fish Remains,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Fish Remains
+Polychaeta,Polychaeta,NA,Polychaeta,NA,NA,NA,ITIS,64358,species,Other,FALSE,FALSE,FALSE,NA,NA
+Cumacea,Cumacea,NA,Cumacea,NA,NA,NA,ITIS,90745,order,Other,FALSE,FALSE,FALSE,NA,NA
+Isopoda,Isopoda,NA,Isopoda,NA,NA,NA,ITIS,92120,order,Other,FALSE,FALSE,FALSE,NA,NA
+Other,Other,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Other
+Unknown,Unknown,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Unknown
+Appendicularian,Appendicularia,NA,Appendicularia,NA,NA,NA,ITIS,159664,class,Appendicularian,FALSE,FALSE,FALSE,NA,NA
+Hyperia,Hyperia,NA,Hyperia,NA,NA,NA,ITIS,95109,species,Other,FALSE,FALSE,FALSE,NA,NA
+Neomysis,Neomysis,NA,Neomysis,NA,NA,NA,ITIS,90054,genus,Other,FALSE,FALSE,FALSE,NA,NA
+Copepod,Copepoda,NA,Copepoda,NA,NA,NA,ITIS,85257,subclass,Other,FALSE,FALSE,FALSE,NA,NA
+Centrropages,Centropages,NA,Centropages,NA,NA,NA,ITIS,85761,genus,Centropages,FALSE,FALSE,FALSE,NA,NA
+Fish Egg,Other,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Other
+Cumacean,Cumacea,NA,Cumacea,NA,NA,NA,ITIS,90745,order,Other,FALSE,FALSE,FALSE,NA,NA
+Calanus  Juv,Calanus,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Cyprid,Cyprididae,NA,Cyprididae,NA,NA,NA,ITIS,84462,family,Other,FALSE,FALSE,FALSE,NA,NA
+Calanus,Calanus,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Parasite,Parasite,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Parasite
+Shrimp Zooae,Malacostraca,NA,Malacostraca,NA,NA,NA,ITIS,89787,class,Other,FALSE,FALSE,FALSE,NA,NA
+Euphausid Calyptopis,Euphausiacea,NA,Euphausiacea,NA,NA,NA,ITIS,95496,order,Krill,FALSE,FALSE,FALSE,NA,NA
+Euphausid Furcilia,Euphausiacea,NA,Euphausiacea,NA,NA,NA,ITIS,95496,order,Krill,FALSE,FALSE,FALSE,NA,NA
+Worm Parasite,Parasite,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Parasite
+Calanoid Small,Calanoida,NA,Calanoida,NA,NA,NA,ITIS,85258,order,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Mertridia,Metridia,NA,Metridia,NA,NA,NA,ITIS,85734,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Ostracod,Ostracoda,NA,Ostracoda,NA,NA,NA,ITIS,84195,species,Other,FALSE,FALSE,FALSE,NA,NA
+Bivalve,Bivalvia,NA,Bivalvia,NA,NA,NA,ITIS,79118,class,Other,FALSE,FALSE,FALSE,NA,NA
+Themisto,Themisto,NA,Themisto,NA,NA,NA,ITIS,95167,genus,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Centropages,Centropages,NA,Centropages,NA,NA,NA,ITIS,85761,genus,Centropages,FALSE,FALSE,FALSE,NA,NA
+Gammarid,Gammarus,NA,Gammarus,NA,NA,NA,ITIS,93773,species,Other,FALSE,FALSE,FALSE,NA,NA
+Parasite Round,Parasite,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Parasite
+Temora,Temora,NA,Temora,NA,NA,NA,ITIS,85874,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calanus Juv,Calanus,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Pleuromamma,Pleuromamma,NA,Pleuromamma,NA,NA,NA,ITIS,85751,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Rhincalanus,Rhincalanus,NA,Rhincalanus,NA,NA,NA,ITIS,85316,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calyptopis,Euphausiacea,NA,Euphausiacea,NA,NA,NA,ITIS,95496,order,Krill,FALSE,FALSE,FALSE,NA,NA
+E M P T Y,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,NA
+Themisto Small,Themisto,NA,Themisto,NA,NA,NA,ITIS,95167,genus,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Caligidae,Caligidae,NA,Caligidae,NA,NA,NA,ITIS,89008,family,Other,FALSE,FALSE,FALSE,NA,NA
+Gammarus,Gammarus,NA,Gammarus,NA,NA,NA,ITIS,93773,species,Other,FALSE,FALSE,FALSE,NA,NA
+Gammarus Small,Gammarus,NA,Gammarus,NA,NA,NA,ITIS,93773,species,Other,FALSE,FALSE,FALSE,NA,NA
+Fish,Fish Remains,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Fish Remains
+Veliger,Mollusca,NA,Mollusca,NA,NA,NA,ITIS,69458,phylum,Other,FALSE,FALSE,FALSE,NA,NA
+Calanus C5,Calanus C5,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Candacia,Candacia,NA,Candacia,NA,NA,NA,ITIS,86020,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Oithona,Oithona,NA,Oithona,NA,NA,NA,ITIS,88802,genus,Other,FALSE,FALSE,FALSE,NA,NA
+Euphausia,Euphausia,NA,Euphausia,NA,NA,NA,ITIS,95501,order,Krill,FALSE,FALSE,FALSE,NA,NA
+Parasite Worm,Parasite,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Parasite
+Mertridia Juv,Metridia,NA,Metridia,NA,NA,NA,ITIS,85734,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Crab Zooea,Malacostraca,NA,Malacostraca,NA,NA,NA,ITIS,89787,class,Other,FALSE,FALSE,FALSE,NA,NA
+Euphausid Juv,Euphausia,NA,Euphausia,NA,NA,NA,ITIS,95501,order,Krill,FALSE,FALSE,FALSE,NA,NA
+Empty,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,NA
+Shrimp Caridean,Caridea,NA,Caridea,NA,NA,NA,ITIS,96106,suborder,Other,FALSE,FALSE,FALSE,NA,NA
+Nauplii,Crustacea,NA,Crustacea,NA,NA,NA,ITIS,83677,species,Other,FALSE,FALSE,FALSE,NA,NA
+Nematode,Nematoda,NA,Nematoda,NA,NA,NA,ITIS,59490,phylum,Other,FALSE,FALSE,FALSE,NA,NA
+Unknown Soft,Unknown,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Unknown
+Sapphirinidae,Sapphirinidae,NA,Sapphirinidae,NA,NA,NA,ITIS,88830,family,Other,FALSE,FALSE,FALSE,NA,NA
+Themisto Juv,Themisto,NA,Themisto,NA,NA,NA,ITIS,95167,genus,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Calanoid Digested,Calanoida,NA,Calanoida,NA,NA,NA,ITIS,85258,order,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Caligadidae,Caligidae,NA,Caligidae,NA,NA,NA,ITIS,89008,family,Other,FALSE,FALSE,FALSE,NA,NA
+Calanoid Unknown,Calanoida,NA,Calanoida,NA,NA,NA,ITIS,85258,order,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Sapphirina,Sapphirinidae,NA,Sapphirinidae,NA,NA,NA,ITIS,88830,family,Other,FALSE,FALSE,FALSE,NA,NA
+Thysanopoda,Thysanopoda,NA,Thysanopoda,NA,NA,NA,ITIS,95582,genus,Krill,FALSE,FALSE,FALSE,NA,NA
+Caligoida,Siphonostomatoida,NA,Siphonostomatoida,NA,NA,NA,ITIS,610010,order,Other,FALSE,FALSE,FALSE,NA,NA
+Fish Remains,Fish Remains,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Fish Remains
+Themistella,Themistella,NA,Themistella,NA,NA,NA,ITIS,95164,genus,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Paraeuchaeta,Paraeuchaeta,NA,Paraeuchaeta,NA,NA,NA,ITIS,610024,species,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Monstrilloida,Monstrilloida,NA,Monstrilloida,NA,NA,NA,ITIS,88989,order,Other,FALSE,FALSE,FALSE,NA,NA
+Gastropod Eggs,Other,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Other
+Paraeucheata,Paraeuchaeta,NA,Paraeuchaeta,NA,NA,NA,ITIS,610024,species,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Gastropod Egg,Other,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Other
+Americamysis,Americamysis,NA,Americamysis,NA,NA,NA,ITIS,682489,genus,Other,FALSE,FALSE,FALSE,NA,NA
+Gastropod,Gastropoda,NA,Gastropoda,NA,NA,NA,ITIS,69459,class,Other,FALSE,FALSE,FALSE,NA,NA
+Hyperiid,Hyperiidea,NA,Hyperiidea,NA,NA,NA,ITIS,95107,suborder,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Mysid,Mysidae,NA,Mysidae,NA,NA,NA,ITIS,89856,family,Other,FALSE,FALSE,FALSE,NA,NA
+Cetropages,Centropages,NA,Centropages,NA,NA,NA,ITIS,85761,genus,Centropages,FALSE,FALSE,FALSE,NA,NA
+Hyperiella,Hyperiella,NA,Hyperiella,NA,NA,NA,ITIS,95120,genus,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Thysanoessa,Thysanoessa,NA,Thysanoessa,NA,NA,NA,ITIS,95571,genus,Krill,FALSE,FALSE,FALSE,NA,NA
+Gammarid Juv,Gammarus,NA,Gammarus,NA,NA,NA,ITIS,93773,species,Other,FALSE,FALSE,FALSE,NA,NA
+Shrimp Pinead,Penaeidae,NA,Penaeidae,NA,NA,NA,ITIS,95602,family,Other,FALSE,FALSE,FALSE,NA,NA
+Hydrachnidae,Hydrachnidae,NA,Hydrachnidae,NA,NA,NA,ITIS,83122,family,Other,FALSE,FALSE,FALSE,NA,NA
+Copepod Unknonw,Copepoda,NA,Copepoda,NA,NA,NA,ITIS,85257,subclass,Other,FALSE,FALSE,FALSE,NA,NA
+Eurytemora,Eurytemora,NA,Eurytemora,NA,NA,NA,ITIS,85862,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Chalimus,Caligidae,NA,Caligidae,NA,NA,NA,ITIS,89008,family,Other,FALSE,FALSE,FALSE,NA,NA
+Copepod Unknown,Copepoda,NA,Copepoda,NA,NA,NA,ITIS,85257,subclass,Other,FALSE,FALSE,FALSE,NA,NA
+Foraminifera,Foraminiferida,NA,Foraminiferida,NA,NA,NA,ITIS,44030,order,Other,FALSE,FALSE,FALSE,NA,NA
+Paraphronima,Paraphronima,NA,Paraphronima,NA,NA,NA,ITIS,95371,genus,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Pleuromamam,Pleuromamma,NA,Pleuromamma,NA,NA,NA,ITIS,85751,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Pseudodiaptomas,Pseudodiaptomus,NA,Pseudodiaptomus,NA,NA,NA,ITIS,85848,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calanus C6,Calanus C6,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calanus C7,Calanus C7,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calanus C8,Calanus C8,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calanus C3,Calanus C3,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Tortanus,Tortanus,NA,Tortanus,NA,NA,NA,ITIS,86099,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Euphausid,Euphausia,NA,Euphausia,NA,NA,NA,ITIS,95501,order,Krill,FALSE,FALSE,FALSE,NA,NA
+Polycheate,Polychaeta,NA,Polychaeta,NA,NA,NA,ITIS,64358,species,Other,FALSE,FALSE,FALSE,NA,NA
+Parasitic Worm,Parasite,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Parasite
+F Ish Remains,Fish Remains,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Fish Remains
+Amphipod,Amphipoda,NA,Amphipoda,NA,NA,NA,ITIS,93294,order,Amphipod,FALSE,FALSE,FALSE,NA,NA
+Limacina,Limacina,NA,Limacina,NA,NA,NA,ITIS,76336,species,Other,FALSE,FALSE,FALSE,NA,NA
+Parasiteworm,Parasite,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,Parasite
+Microsetella,Microsetella,NA,Microsetella,NA,NA,NA,ITIS,86208,genus,Other,FALSE,FALSE,FALSE,NA,NA
+Clione,Clione,NA,Clione,NA,NA,NA,ITIS,78088,genus,Other,FALSE,FALSE,FALSE,NA,NA
+Calanus C9,Calanus C9,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calanus C10,Calanus C10,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calanus C11,Calanus C11,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calanus C12,Calanus C12,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calanus C13,Calanus C13,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+Calanus C14,Calanus C14,NA,Calanus,NA,NA,NA,ITIS,85263,genus,Other Calanoids,FALSE,FALSE,FALSE,NA,NA
+,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,FALSE,FALSE,OCB,NA
