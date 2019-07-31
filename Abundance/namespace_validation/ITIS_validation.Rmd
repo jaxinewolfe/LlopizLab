@@ -26,28 +26,12 @@ csv table with all species names in a column "name" and their corresponding ids 
 ```{r}
 # local development only
 rm(list=ls())
-setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/namespace_validation")
-#man.data <- read.csv(file.choose())
+
+# man.data <- read.csv(file.choose())
 # man.data <- read.csv(tk_choose.files(caption = "Choose a .csv file to validate"))
-# man.data <- read.csv("https://raw.githubusercontent.com/klqi/EDI-NES-LTER-2019/master/namespace_validation/20190529_classify_classlabel.csv")
-# man.data <- read.csv("classify_NOAA_sample.csv", header = TRUE)
 
-my_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/namespace_validation/resolved.csv"
-
-# Load Justin data
-preytype_Justin <- read.csv("classify_Forage_Fish_Diet_Data_2013_2015_Final_long.csv", 
-                            header = TRUE) %>% select(preytype)
-# Isolate and clean preytype
-preytype_Justin <- trimws(gsub('([[:upper:]])', ' \\1',
-                               unique(preytype_Justin$preytype)))
-# repeat for Sarahs data
-preytype_Sarah <- read.csv("classify_LTER201802StomachData_LTERFFSizes.csv", 
-                           header = TRUE) %>% select(PreySpecies)
-preytype_Sarah <- trimws(gsub('([[:upper:]])', ' \\1',
-                               unique(preytype_Sarah$PreySpecies)))
-# merge unique Llopiz preytypes
-Llopiz_preytypes <- unique(c(preytype_Justin,preytype_Sarah))
-# write.csv(as.data.frame(Llopiz_preytypes), file = "Llopiz_preytypes.csv")
+my_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/namespace_validation"
+setwd(my_path)
 
 ```
 
@@ -309,9 +293,10 @@ for (row in 1:nrow(man.data)) {
 }
 
 # collect all names with no resolved id
-sosik_specific <- man.data$preytype_validated[is.na(man.data$resolved_id_fromgnr)]
-worms_verified <- man.data$preytype_validated[!is.na(man.data$resolved_id_fromgnr)]
+# sosik_specific <- man.data$preytype_validated[is.na(man.data$resolved_id_fromgnr)]
+# worms_verified <- man.data$preytype_validated[!is.na(man.data$resolved_id_fromgnr)]
 
-#convert to csv file 
+# convert to csv file 
 # write.csv(man.data, my_path)
+
 ```

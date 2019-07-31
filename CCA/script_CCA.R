@@ -31,15 +31,8 @@ library(maptools)
 setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA")
 
 # load necessary dataset
-dietdata <- read_csv("Forage_Fish_Diet_Data_2013_2015_Final.csv")
+dietdata <- read_csv("Forage_Fish_Diet_Data_2013_2015_wide.csv")
 dietdata[is.na(dietdata)] <- 0 # convert empties to 0
-
-## Wide to Long Conversion ##
-
-diet.long <- dietdata %>%
-  gather(preytype,count,Centropages_spp:Unknown,factor_key = TRUE) %>%
-  filter(count != 0)
-# write.csv(diet.long, "Forage_Fish_Diet_Data_2013_2015_Final_long.csv")
 
 ## Merging Fisheries Cruise data files ##
 # Combine spring and fall cruise datasets to be merged with the diet data
@@ -68,6 +61,9 @@ for (i in 2:length(file_list)){
 
 ## Merging Diet and Cruise Datasets ##
 
+# reset working directory
+setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA")
+
 # Prep to merge: Standardize the character layout for time
 
 # Adjust Time column of dietdata: convert to %H:%M format
@@ -85,7 +81,7 @@ diet_join <- unique(left_join(x = dietdata, y = FSCSdataset,
 
 # isolate missing fisheries cruise_stations
 missing <- diet_join[is.na(diet_join$EST_DAY),]
-write_csv(missing,"FISHERIES_MIA.csv")
+# write_csv(missing,"FISHERIES_MIA.csv")
 
 # add column with datetime
 diet_join$GMT_datetime <- with(diet_join, ymd_hms(paste(GMT_YEAR, GMT_MONTH, GMT_DAY, GMT_TIME, sep= ' '),
@@ -129,12 +125,14 @@ diet_join <- diet_join[complete.cases(diet_join[ , "day_night"]),]
 diet_join$seasons <- ifelse((diet_join$EST_MONTH == 3 | diet_join$EST_MONTH == 4 |
                             diet_join$EST_MONTH == 5), yes = "Spring", no = "Fall")
 
+write_csv(diet_join, path = file.path("NESLTER_2013_2015_diet.csv"))
+
 
 # Canonical Correspondence Analysis ---------------------------------------
 
 # Aggregate data based on groupings of explanatory variables
 dietsp <- diet_join %>%
-  group_by(Region,day_night, seasons, Station_Depth,SURFTEMP,BOTTEMP) %>%
+  group_by(Region, day_night, seasons, Station_Depth,SURFTEMP,BOTTEMP) %>%
   # Create species-specific data frame
   filter(Species == "A. aestivalis") %>%
   summarise_at(vars(Centropages_spp:Unknown), sum) 
