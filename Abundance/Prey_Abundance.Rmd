@@ -1,0 +1,103 @@
+---
+title: "Relative Prey Abundance in the Gut Content of Small Pelagic Fish along the Northeast Shelf"
+author: "Jaxine Wolfe"
+date: "7/28/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+## R Markdown
+
+This file calculates the relative abundance for...
+
+```{r}
+# local development only
+rm(list=ls())
+
+# set working directory
+my_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance"
+setwd(my_path)
+
+```
+
+## Load Merged Data
+
+Note: this code will be updated shortly to include an ifelse statement that merges the diet and resolved taxa files if a merged file doesn't already exist.
+
+```{r}
+# create ifelse statement to merge data if the file doesn't already exist
+# if the file exists, load it
+diet_all <- read_csv("NESLTER_Diet_Taxa_2013_2015.csv")
+
+# if the file does NOT exist, merge the ITIS_Validation output
+# valid_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/itis_validation"
+# 
+# # Load Justin's data
+# diet_2013_2015 <- read_csv(file.path(valid_path,"Forage_Fish_Diet_Data_2013_2015_long.csv"))
+# # Isolate and clean preytype
+# diet_2013_2015$preytype <- trimws(gsub('([[:upper:]])', ' \\1',
+#                                diet_2013_2015$preytype))
+# 
+# # load resolved data
+# resolved_data <- read_csv(file.path(valid_path,"Llopiz_resolved.csv"))
+# 
+# # merge data with ITIS resolved names and specified categorizations
+# diet_all <- left_join(x = diet_2013_2015, y = resolved_data, 
+#                           by=(c("preytype"="Llopiz_preytypes")))
+
+```
+
+## Generating summary spreadsheets and analyses
+
+Note: this code currently produces a total relative prey abundance across all cruises, however, it will be updated shortly to produce figures for individual cruises.
+
+```{r}
+
+# these cruises will be looped over to produce plots for each cruise
+cruises <- unique(diet_all$Cruise)
+
+# Data is in long format
+
+# NOTE: The smallest individual unit is Cruise_Station_FishSpecies
+# These summary sheets can be exported as needed
+
+# Generate summary sheet with prey totals per Cruise_Station_FishSpecies
+sca_preytot <- diet_all %>%
+  filter(count != "NA") %>%
+  group_by(Cruise, Station, Species, resolved_higher_order_fromgnr) %>%
+  # add prey items across fish from the same cruise and station
+  summarize(PreyTotal = sum(count))
+
+sca_percent <- sca_preytot %>%
+  group_by(Species) %>%
+  # add column for percent composition
+  mutate(PreyPercent = (PreyTotal/sum(PreyTotal))*100)
+# write.csv("LTER_SCA_percent.csv")
+
+# Generate summary sheet with grand prey totals and richness
+sca_summary <- sca_preytot %>%
+  group_by(Cruise, Station, Species) %>%
+  summarise(TotalCount = sum(PreyTotal),
+            PreyRichness = length(unique(resolved_higher_order_fromgnr)))
+
+# GENERATE SUMMARY FIGURES
+# Percent composition
+# remember percentages are calculated for Cruise_Station_FishSpecies
+ggplot(data = sca_percent, aes(Species, PreyPercent, fill = resolved_higher_order_fromgnr)) +
+  geom_col() +
+  scale_fill_brewer(palette = "Set3", na.value = "grey50") +
+  labs(title = "Diet Composition Per Fish", x = "Fish Species", y = "Percent Composition") +
+  theme_classic()
+ggsave("RelAbund_total.jpg")
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+

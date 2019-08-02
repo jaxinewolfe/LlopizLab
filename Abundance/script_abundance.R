@@ -11,7 +11,6 @@ library(tidyverse)
 # Set working directory
 setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance")
 
-
 # Merging ITIS Validation -------------------------------------------------
 
 namespace_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/namespace_validation"
@@ -22,27 +21,17 @@ itis_prey <- read_csv("Llopiz_resolved.csv")
 
 # Load Justin data
 # rename as diet_Justin
-preytype_Justin <- read_csv("Justin_Forage_Fish_Diet_Data_2013_2015_Final_long.csv")
+preytype_Justin <- read_csv("Forage_Fish_Diet_Data_2013_2015_long.csv")
 # Isolate and clean preytype
 preytype_Justin$preytype <- trimws(gsub('([[:upper:]])', ' \\1',
                                preytype_Justin$preytype))
-# repeat for Sarahs data
-# rename as diet_Sarah
-preytype_Sarah <- read_csv("Sarah_LTER201802StomachData_LTERFFSizes.csv")
-preytype_Sarah$PreySpecies <- trimws(gsub('([[:upper:]])', ' \\1',
-                              preytype_Sarah$PreySpecies))
 
 # merge data
 diet_Justin <- left_join(x = preytype_Justin, y = itis_prey, 
                           by=(c("preytype"="Llopiz_preytypes")))
 
-diet_Sarah <- left_join(x = preytype_Sarah, y = itis_prey, 
-                         by=(c("PreySpecies"="Llopiz_preytypes")))
-
-
 # Real Data ---------------------------------------------------------------
 
-# Load trial stomach content data
 # Data is in long format
 # I will be using the diet_Justin df
 
@@ -63,10 +52,6 @@ sca_percent <- sca_preytot %>%
   mutate(PreyPercent = (PreyTotal/sum(PreyTotal))*100)
 # write.csv("LTER_SCA_percent.csv")
 
-SEPALL_PCT <- SEPALL %>%
-  group_by(taxa,vent) %>%
-  mutate(percent = (count/sum(count))*100)
-
 # Generate summary sheet with grand prey totals and richness
 sca_summary <- sca_preytot %>%
   group_by(Cruise, Station, Species) %>%
@@ -81,7 +66,8 @@ sca_summary <- sca_preytot %>%
 
 # Percent composition
 # remember percentages are calculated for Cruise_Station_FishSpecies
-ggplot(data = sca_percent, aes(Species, PreyPercent, fill = resolved_higher_order_fromgnr)) +
+ggplot(data = sca_percent, mapping = aes(Species, PreyPercent, 
+                               fill = resolved_higher_order_fromgnr)) +
   geom_col() +
   # scale_fill_brewer(palette = "Set3") +
   labs(title = "Diet Composition Per Fish", x = "Fish Species", y = "Percent Composition") +

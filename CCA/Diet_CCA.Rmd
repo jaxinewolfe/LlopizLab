@@ -1,20 +1,14 @@
-#### Canonical Correspondence Analysis of Fish Diets ####
+---
+title: "Canonical Correspondance Analysis for Diet Data"
+author: "Jaxine Wolfe"
+date: "7/28/2019"
+output: html_document
+---
 
-## Date: 07-01-2019
-## Authors: Justin Suca and Jaxine Wolfe
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(root.dir = "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA")
 
-## Goal: Generate a CCA of the diet composition of each fish species per LTER cruise
-
-# Overview: 
-# Data is merged from fisheries datasets to define daynight and season explanatory vars
-# prey counts are converted proportions 
-# the df is split into a matrix of predictors and responses (diet proportions)
-# any fish without any diet data, unknowns, other are removed
-
-# This script requires a folder of fisheries trawl data and the SCA data
-
-# Setup -------------------------------------------------------------------
-
+# local development
 rm(list = ls())
 
 # load necessary libraries
@@ -25,22 +19,23 @@ library(vegan)
 library(stringr)
 library(maptools)
 
-# Data Wrangling ----------------------------------------------------------
-
 # set working directory
-my_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA" 
-setwd(my_path)
+# my_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA" 
+# setwd(my_path)
 
-# load necessary dataset
-dietdata <- read_csv("Forage_Fish_Diet_Data_2013_2015_wide.csv")
-dietdata[is.na(dietdata)] <- 0 # convert empties to 0
+```
 
+## R Markdown
+
+File manipulation
+```{r, echo=FALSE}
 ## Merging Fisheries Cruise data files ##
 # Combine spring and fall cruise datasets to be merged with the diet data
 
-setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA/FSCSTables_SVSTA/")
+fisheries_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA/FSCSTables_SVSTA/"
 # create list of files in the working directory
-file_list <- list.files()
+file_list <- list.files(path = fisheries_path, full.names = TRUE)
+
 # Define columns to be extracted from fisheries data
 FSCScols <- c("CRUISE6", "STATION", "EST_YEAR", "EST_MONTH", "EST_DAY", "EST_TIME",
               "GMT_YEAR", "GMT_MONTH", "GMT_DAY", "GMT_TIME", "SURFTEMP", "BOTTEMP")
@@ -48,32 +43,36 @@ FSCScols <- c("CRUISE6", "STATION", "EST_YEAR", "EST_MONTH", "EST_DAY", "EST_TIM
 # Creates merged dataset from the fisheries data
 for (i in 2:length(file_list)){
 
-    FSCSdataset <- read.csv(file_list[1], header = TRUE) %>%
+    FSCSdataset <- read_csv(file_list[1]) %>%
       select(FSCScols)
   
     # create temporary dataset to ammend the FSCSdataset
-    temp_dataset <-read.csv(file_list[i], header = TRUE) %>%
+    temp_dataset <- read_csv(file_list[i]) %>%
       select(FSCScols)
     FSCSdataset <- rbind(FSCSdataset, temp_dataset[, colnames(FSCSdataset)])
     FSCSdataset[is.na(FSCSdataset)] <- "NA" # convert empties to NA
     rm(temp_dataset)
 }
 
+# set surface/bottom temp to numeric type (NA may have to be filtered later)
+FSCSdataset$SURFTEMP <- as.numeric(FSCSdataset$SURFTEMP)
+FSCSdataset$BOTTEMP <- as.numeric(FSCSdataset$BOTTEMP)
 
-## Merging Diet and Cruise Datasets ##
+# load necessary dataset
+dietdata <- read_csv("Forage_Fish_Diet_Data_2013_2015_wide.csv")
+dietdata[is.na(dietdata)] <- 0 # convert empties to 0
 
-# reset working directory
-setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/CCA")
+```
 
+## Merge Fisheries and diet datasets
+
+```{r, echo=FALSE}
 # Prep to merge: Standardize the character layout for time
 
 # Adjust Time column of dietdata: convert to %H:%M format
 # Rewrite time column in diet dataset
 dietdata$Time <- format(as.POSIXct(str_pad(dietdata$Time, 4, pad = "0"), 
                                    format="%H%M", origin = ""), "%H:%M")
-# Do the same for the fisheries data
-# FSCSdataset$EST_TIME <- format(as.POSIXct(str_pad(FSCSdataset$EST_TIME, 8, pad = "0"), 
-                                          # format = "%H:%M:%S", origin = ""), "%H:%M")
 
 # Merge datasets
 # use unique to remove duplicate rows
@@ -93,6 +92,11 @@ diet_join$EST_datetime <- with(diet_join, ymd_hms(paste(EST_YEAR, EST_MONTH, EST
 diet_join <- diet_join[complete.cases(diet_join[ , "GMT_datetime"]),]
 
 
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r, echo = FALSE}
 ## Calculating Day and Night ##
 
 # function creates a vector indicating day vs. night based on sunrise and sunset
@@ -108,9 +112,8 @@ daynight <- function(x) {
   # use 'ifelse'  to create vector indicating day vs. night based on sunrise and sunset
   day_night <- ifelse(ts >= sunrise & ts <= sunset,
                    yes = "Day", no = "Night")
-  print(sunrise)
-  print(sunset)
-
+  # print(sunrise)
+  # print(sunset)
   return(day_night)
 }
 
@@ -126,50 +129,66 @@ diet_join <- diet_join[complete.cases(diet_join[ , "day_night"]),]
 diet_join$seasons <- ifelse((diet_join$EST_MONTH == 3 | diet_join$EST_MONTH == 4 |
                             diet_join$EST_MONTH == 5), yes = "Spring", no = "Fall")
 
-write_csv(diet_join, path = file.path("NESLTER_2013_2015_diet.csv"))
+# write_csv(diet_join, path = file.path("NESLTER_2013_2015_diet.csv"))
+
+```
 
 
-# Canonical Correspondence Analysis ---------------------------------------
+Canonical Correspondence Analysis
+```{r}
 
+fish <- unique(diet_join$Species)
+# write for loop that conducts CCA for each species
+
+## CCA Model setup
 # Aggregate data based on groupings of explanatory variables
 dietsp <- diet_join %>%
-  group_by(Region, day_night, seasons, Station_Depth,SURFTEMP,BOTTEMP) %>%
-  # Create species-specific data frame
-  filter(Species == "A. aestivalis") %>%
-  summarise_at(vars(Centropages_spp:Unknown), sum) 
+  filter(Species == "P. triacanthus") %>%
+  mutate(preytotal = select(., Centropages_spp:Unknown) %>% 
+           rowSums(na.rm = TRUE)) %>%
+  filter(preytotal != 0) # eliminate counts of zero
 
 # this transformation is common in diet studies for proportion 
 trans.arcsine <- function(x){
   asin(sign(x) * sqrt(abs(x)))
 }
 
-# isolate predictors 
-predictors <- select(dietsp, c("Region","day_night","seasons","Station_Depth", "SURFTEMP","BOTTEMP"))
-# isolate diet info
-prey <- dietsp[,7:ncol(dietsp)]
 # create vector of prey count totals per row
-preytotal <- rowSums(prey)
 # convert counts to proportions
-preyprop <- prey/preytotal
-preyprop[preyprop == "NaN"] <- 0
+dietprop <- select(dietsp, Centropages_spp:Unknown)/dietsp$preytotal
+dietprop[dietprop == "NaN"] <- 0
 # transform proportions using arcsin
-preyarc <- trans.arcsine(preyprop)
+dietarc <- trans.arcsine(dietprop)
 
-# CCA
+# isolate predictors 
+# "SURFTEMP","BOTTEMP" can be added in but NA's must be filtered
+predictor_cols <- c("Region","day_night","seasons","Station_Depth")
+predictors <- subset(dietsp, select = predictor_cols)
+
+## CCA model
+# Make sure none of the columns contain one category (i.e. all Spring)
 # create a "full" model with all predictors 
 # y ~ x 
 # the dot means "any columns from data that are otherwise not used"
 # Note: none of the rowsums can equal zero
-CCA_full <- cca(preyarc~., predictors)
+CCA_full <- cca(dietarc~., predictors)
 # make a null model
-CCA_null <- cca(preyarc~1,predictors)
+CCA_null <- cca(dietarc~1,predictors)
 # perform a stepwise selection of predictors through permuatation tests against the null model
 CCA_final <- step(CCA_null, scope = formula(CCA_full), test = "perm", perm.max = 100)
 
 # plot the results
-# tiff("B_saida_CCA_190201.tiff",width = 8, height = 6, res = 200, units = "in")
-plot(CCA_final, display = c("sp","bp"))
-dev.off() # returns the number and name of the new active device
-anova(New_CCA)
+# https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/plot.cca
 
-# I left out prey categories that averaged less than 5% by number  in the diet of each species
+plot(CCA_final, display = c("sp","bp"))
+# points(CCA_final, pch=21, col="red", bg="yellow", cex=1.2)
+## Limited output of 'summary'
+head(summary(CCA_final), tail=2)
+
+dev.off() # returns the number and name of the new active device
+anova(CCA_final)
+# tiff("B_saida_CCA_190201.tiff",width = 8, height = 6, res = 200, units = "in")
+
+# I left out prey categories that averaged less than 5% by number in the diet of each species
+```
+

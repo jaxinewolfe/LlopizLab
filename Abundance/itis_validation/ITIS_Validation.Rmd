@@ -9,6 +9,7 @@ namespace_validation: This project uses an R Markdown file (ITIS_validation.Rmd)
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 library(taxize)
 # library(worrms)
 library(plyr)
@@ -30,7 +31,7 @@ rm(list=ls())
 # man.data <- read.csv(file.choose())
 # man.data <- read.csv(tk_choose.files(caption = "Choose a .csv file to validate"))
 
-my_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/namespace_validation"
+my_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/itis_validation"
 setwd(my_path)
 
 ```
@@ -151,11 +152,11 @@ id2taxoninfo <- function(tsn, counter, man.data) {
 
 # helper function to fill in information for abiotic classes
 edge_case <- function(name, counter) {
-  if(name == "PPC" | name == "Fish Remains"|
-     name == "Other"| name == "Unknown" | 
+  if(name == "Fish Remains"|
+     name == "Other"| name == "Unknown Soft" | 
      name == "Parasite" | is.na(name)) {
-    man.data$alt_datasource[counter] <<- "OCB"
-    man.data$alt_resolved_name[counter] <<- toString(name)
+    man.data$data_source[counter] <<- "OCB"
+    man.data$resolved_higher_order_fromgnr[counter] <<- toString(name)
     return(TRUE)
   }
   return(FALSE)
@@ -167,14 +168,12 @@ edge_case <- function(name, counter) {
 ```{r, echo=FALSE, include=FALSE}
 
 # manually added a preytype_validated column for ease of GNR
-preytype_lookup <- read_csv("Llopiz_preytypes.csv")
-# set preytype validated column as man.data
-man.data <- preytype_lookup %>% select(preytype_validated)
+man.data <- read_csv("Llopiz_preytypes.csv")
 
 # Resolve names 
 counter <- 1
 # column names 
-man.data$tsn_id <- NA_character_
+# man.data$tsn_id <- NA_character_
 man.data$resolved_names <- NA_character_
 man.data$taxon_level_fromid <- NA_character_
 man.data$taxon_name_fromid <- NA_character_
@@ -184,13 +183,13 @@ man.data$resolved_id_fromgnr <- NA_character_
 man.data$resolved_taxon_level_fromgnr <- NA_character_
 man.data$resolved_higher_order_fromgnr <- NA_character_
 man.data$name_match <- FALSE
-man.data$id_match <- FALSE
+# man.data$id_match <- FALSE
 man.data$higher_match <- FALSE
-man.data$alt_datasource <- NA_character_
-man.data$alt_resolved_name <- NA_character_
+# man.data$alt_datasource <- NA_character_
+# man.data$alt_resolved_name <- NA_character_
 
 # reorder columns
-man.data[,c("preytype_validated", "tsn_id", "resolved_names", "taxon_level_fromid", "taxon_name_fromid", "higher_order_fromid", "data_source", "resolved_id_fromgnr", "resolved_taxon_level_fromgnr", "resolved_higher_order_fromgnr", "name_match", "id_match", "higher_match", "alt_datasource", "alt_resolved_name")] 
+man.data[,c("preytype_validated", "resolved_names", "taxon_level_fromid", "taxon_name_fromid", "higher_order_fromid", "data_source", "resolved_id_fromgnr", "resolved_taxon_level_fromgnr", "resolved_higher_order_fromgnr", "name_match", "higher_match")] 
 
 # loop through all rows
 for (row in 1:nrow(man.data)) {
@@ -210,7 +209,6 @@ for (row in 1:nrow(man.data)) {
   # hardcoded from data sources: https://resolver.globalnames.org/data_sources
   
   # set primary data source
-  # primary_ds <- "World Register of Marine Species"
   primary_ds <- "ITIS"
   # check if able to resolve name 
   if (!empty(temp)) {
@@ -223,12 +221,13 @@ for (row in 1:nrow(man.data)) {
     if (authority == primary_ds) {
       man.data$data_source[counter] <- authority
     } else {
-      man.data$alt_datasource[counter] <- authority
-      man.data$alt_resolved_name[counter] <- resolved_name
+      man.data$data_source[counter] <- authority
+      man.data$resolved_names[counter] <- resolved_name
     }
     
     # edge case: check if tsn_id does not exist in input file() taxon_level, name, higher order are false)
-    if (man.data$tsn_id[counter] == -999 | is.na(man.data$tsn_id[counter])) {
+    if (man.data$resolved_id_fromgnr[counter] == -999 | 
+        is.na(man.data$resolved_id_fromgnr[counter])) {
       # call helper function to retrieve ID from resolved name 
       acquire_id(resolved_name, counter, man.data)
       # retrieve taxon level from resolved_name
@@ -239,10 +238,10 @@ for (row in 1:nrow(man.data)) {
     else {
       # set resolved_id from resolved_name
       acquire_id(resolved_name, counter, man.data)
-      # call helper function to retrieve taxon info from id
-      id2taxoninfo(man.data$tsn_id[counter], counter, man.data)
       # call helper function to retrieve taxon info from resolved_name 
       name2taxoninfo(resolved_name, counter, man.data)
+      # call helper function to retrieve taxon info from id
+      id2taxoninfo(man.data$resolved_id_fromgnr[counter], counter, man.data)
       
       # check if taxon name matches with resolved
       if (man.data$taxon_name_fromid[counter] == man.data$resolved_names[counter]) {
@@ -250,10 +249,10 @@ for (row in 1:nrow(man.data)) {
         man.data$name_match[counter] <- TRUE
       }
       # check if id matches with resolved
-      if (man.data$tsn_id[counter] == man.data$resolved_id_fromgnr[counter]) {
-        # set id_match to true
-        man.data$id_match[counter] <- TRUE
-      }
+      # if (man.data$tsn_id[counter] == man.data$resolved_id_fromgnr[counter]) {
+      #   # set id_match to true
+      #   man.data$id_match[counter] <- TRUE
+      # }
       # check if higher order matches with resolved
       if (man.data$higher_order_fromid[counter] == man.data$resolved_higher_order_fromgnr[counter]) {
         man.data$higher_match[counter] <- TRUE
@@ -264,9 +263,9 @@ for (row in 1:nrow(man.data)) {
     man.data$resolved_names[counter] <- NA_character_
 
     # edge case: check if tsn_id is not empty for row 
-    if(!is.na(man.data$tsn_id[counter])) {
+    if(!is.na(man.data$resolved_id_fromgnr[counter])) {
       # fill in taxon info based on ID
-      id <- man.data$tsn_id[counter]
+      id <- man.data$resolved_id_fromgnr[counter]
       id2taxoninfo(id, counter, man.data)
       # leave resolved information as NA and check match columns false
     }
@@ -292,11 +291,29 @@ for (row in 1:nrow(man.data)) {
   counter <- counter + 1
 }
 
-# collect all names with no resolved id
-# sosik_specific <- man.data$preytype_validated[is.na(man.data$resolved_id_fromgnr)]
-# worms_verified <- man.data$preytype_validated[!is.na(man.data$resolved_id_fromgnr)]
-
 # convert to csv file 
-# write.csv(man.data, my_path)
+write.csv(man.data, file.path("Llopiz_resolved.csv"))
+
+# isolate taxa classified as other to fact check
+# Llopiz_other <- Llopiz_resolved %>% filter(resolved_higher_order_fromgnr == "Other")
 
 ```
+
+The is prep for relative prey abundance
+```{r}
+
+abundance_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/"
+
+# Load Justin's data
+diet_2013_2015 <- read_csv("Forage_Fish_Diet_Data_2013_2015_long.csv")
+# Isolate and clean preytype
+diet_2013_2015$preytype <- trimws(gsub('([[:upper:]])', ' \\1',
+                               diet_2013_2015$preytype))
+
+# merge data with ITIS resolved names and specified categorizations
+diet_all <- left_join(x = diet_2013_2015, y = man.data, 
+                          by=(c("preytype"="Llopiz_preytypes")))
+
+write.csv(diet_all, file.path(abundance_path, "NESLTER_Diet_Taxa_2013_2015.csv"))
+```
+

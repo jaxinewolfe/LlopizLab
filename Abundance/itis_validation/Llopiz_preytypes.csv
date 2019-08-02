@@ -1,7 +1,7 @@
 Llopiz_preytypes,preytype_validated
 Centropages_spp,Centropages
 Calanus_spp,Calanus
-P P C,PPC
+P P C,Calanoida
 Temora_longicornis,Temora longicornis
 Calanoida,Calanoida
 Candacia_spp,Candacia
@@ -44,7 +44,7 @@ Polychaeta,Polychaeta
 Cumacea,Cumacea
 Isopoda,Isopoda
 Other,Other
-Unknown,Unknown
+Unknown,Other
 Appendicularian,Appendicularia
 Hyperia,Hyperia
 Neomysis,Neomysis
@@ -92,7 +92,7 @@ Empty,NA
 Shrimp Caridean,Caridea
 Nauplii,Crustacea
 Nematode,Nematoda
-Unknown Soft,Unknown
+Unknown Soft,Unknown Soft
 Sapphirinidae,Sapphirinidae
 Themisto Juv,Themisto
 Calanoid Digested,Calanoida

@@ -1,10 +1,11 @@
 # LlopizLab
 
-Project: NES-LTER 
-Goal: Producing a reproducible workflow for analysis of diet data from LTER cruises
+This branch contains Jaxine's Partnership Education Program project. Over the summer of 2019, she worked in collaboration with the Northeast Shelf Long Term Ecological Research (NES-LTER) group and the Llopiz lab at Wood's Hole Oceanographic Institution. The overarching goal of her research was to produce a reproducible workflow for analysis of diet data from NES-LTER cruises.
 
-Use Cases:
-- R script for utilization of single sheet long format for data entry (complimentary to subsequent workflows)
-- Workflow for data visualization: Relative abundance prey types per cruise. Side project: ITIS namespace validation resolving Llopiz lab and NOAA (EcoMon and) diet taxa classifications.
-- Workflow for data visualization: CCA per cruise and species-specific diet. Metadata tables and workflow for data package for 2013-2015 data in Suca et al. 2018
-- Workflow for the prey size data per cruise: Calculate median length (mm) per prey type using appropriate length-to-biomass conversions
+Project Collaborators: Justin Suca, Joel Llopiz, Stace Beaulieu, Jaxine Wolfe
+
+### Project Components
+**Abundance:** This project generates visualization of the relative abundance of prey types per cruise and fish species.
+*ITIS Taxonomic Validation:* This project resolves and validates prey species classifications and assigns categorical bins of prey type. 
+**CCA:** This project conducts a canonical correspondence analysis for distinct fish species across multiple cruises.
+**EML Assembly:** This project assembles metadata tables for fish diet data from 2013-2015 (Suca et al. 2018) and constructs an EML assembly line for the packaging and publishing of LTER data to the EDI repository. 
