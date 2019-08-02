@@ -5,7 +5,9 @@ This branch contains Jaxine's Partnership Education Program project. Over the su
 Project Collaborators: Justin Suca, Joel Llopiz, Stace Beaulieu, Jaxine Wolfe
 
 ### Project Components
-**Abundance:** This project generates visualization of the relative abundance of prey types per cruise and fish species.
-*ITIS Taxonomic Validation:* This project resolves and validates prey species classifications and assigns categorical bins of prey type. 
-**CCA:** This project conducts a canonical correspondence analysis for distinct fish species across multiple cruises.
+**Relative Prey Abundance:** This project generates visualization of the relative abundance of prey types per cruise and fish species.
+- *ITIS Taxonomic Validation:* This project resolves and validates prey species classifications and assigns categorical bins of prey type. 
+
+**Diet CCA:** This project conducts a canonical correspondence analysis for distinct fish species across multiple cruises.
+
 **EML Assembly:** This project assembles metadata tables for fish diet data from 2013-2015 (Suca et al. 2018) and constructs an EML assembly line for the packaging and publishing of LTER data to the EDI repository. 

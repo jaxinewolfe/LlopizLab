@@ -2,12 +2,16 @@
 
 This project uses an R Markdown file (Prey_Abundance.Rmd) to summarize and plot the relative prey abundance for fish species from each NES-LTER cruise. The output of this project generates plots of relative prey abundance for each fish and cruise.  
 
-**NOTE:** Run * ITIS_Validation.Rmd* located in the [itis-validation folder](https://github.com/jaxinewolfe/LlopizLab/tree/master/Abundance/itis_validation) before running *Prey_Abundance.Rmd*
+**NOTE:** Run *ITIS_Validation.Rmd* located in the [itis-validation folder](https://github.com/jaxinewolfe/LlopizLab/tree/master/Abundance/itis_validation) before running *Prey_Abundance.Rmd*
 
 **Files in Directory:**
+
 *Prey_Abundance.Rmd* is the active R Markdown script used to produce the relative prey abundance figures for fish species from each cruise
+
 *itis_validation* is a folder containing the components used to resolve and validate the assigned prey types with ITIS 
+
 *NESLTER_Diet_Taxa_2013_2015.csv* is the file output by *itis_validation* which contains NES-LTER fish stomach content data merged with taxonomic information used to bin prey types
+
 *RelAbund_Cruise.pdf* are the relative abundance figures output from *Prey_Abundance.Rmd*
 
 **Prerequisites:**
