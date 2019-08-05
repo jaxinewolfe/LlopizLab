@@ -91,7 +91,6 @@ diet_join$EST_datetime <- with(diet_join, ymd_hms(paste(EST_YEAR, EST_MONTH, EST
 # eliminate rows with NA for datetime (25 total)
 diet_join <- diet_join[complete.cases(diet_join[ , "GMT_datetime"]),]
 
-
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
@@ -121,15 +120,15 @@ daynight <- function(x) {
 diet_join$day_night <- daynight(diet_join)
 diet_join <- diet_join[complete.cases(diet_join[ , "day_night"]),]
 
-# isolate missing fisheries cruise_stations
-# mia_daynight <- diet_final[is.na(diet_final$day_night),]
-# write_csv(mia_daynight, "daynight_NAs.csv")
-
 ## Define Seasons ##
 diet_join$seasons <- ifelse((diet_join$EST_MONTH == 3 | diet_join$EST_MONTH == 4 |
                             diet_join$EST_MONTH == 5), yes = "Spring", no = "Fall")
 
-# write_csv(diet_join, path = file.path("NESLTER_2013_2015_diet.csv"))
+# write csv if the file doesn't exist in the directory
+if (!file.exists("NESLTER_2013_2015_diet.csv")) {
+  write.csv(diet_join, file.path("NESLTER_2013_2015_diet.csv"), 
+            row.names = FALSE)
+}
 
 ```
 
@@ -137,58 +136,70 @@ diet_join$seasons <- ifelse((diet_join$EST_MONTH == 3 | diet_join$EST_MONTH == 4
 Canonical Correspondence Analysis
 ```{r}
 
-fish <- unique(diet_join$Species)
-# write for loop that conducts CCA for each species
-
 ## CCA Model setup
-# Aggregate data based on groupings of explanatory variables
-dietsp <- diet_join %>%
-  filter(Species == "P. triacanthus") %>%
-  mutate(preytotal = select(., Centropages_spp:Unknown) %>% 
-           rowSums(na.rm = TRUE)) %>%
-  filter(preytotal != 0) # eliminate counts of zero
-
 # this transformation is common in diet studies for proportion 
 trans.arcsine <- function(x){
   asin(sign(x) * sqrt(abs(x)))
 }
 
-# create vector of prey count totals per row
-# convert counts to proportions
-dietprop <- select(dietsp, Centropages_spp:Unknown)/dietsp$preytotal
-dietprop[dietprop == "NaN"] <- 0
-# transform proportions using arcsin
-dietarc <- trans.arcsine(dietprop)
-
-# isolate predictors 
-# "SURFTEMP","BOTTEMP" can be added in but NA's must be filtered
+# fish species to loop through
+fish <- unique(diet_join$Species)
+# set explanatory variables to call
 predictor_cols <- c("Region","day_night","seasons","Station_Depth")
-predictors <- subset(dietsp, select = predictor_cols)
+# OPT: add "SURFTEMP","BOTTEMP"
+# uncomment to add "SURFTEMP" and "BOTTEMP"as explanatory variables for CCA
+# diet_join <- diet_join %>% filter(!is.na(SURFTEMP) & !is.na(BOTTEMP))
 
-## CCA model
-# Make sure none of the columns contain one category (i.e. all Spring)
-# create a "full" model with all predictors 
-# y ~ x 
-# the dot means "any columns from data that are otherwise not used"
-# Note: none of the rowsums can equal zero
-CCA_full <- cca(dietarc~., predictors)
-# make a null model
-CCA_null <- cca(dietarc~1,predictors)
-# perform a stepwise selection of predictors through permuatation tests against the null model
-CCA_final <- step(CCA_null, scope = formula(CCA_full), test = "perm", perm.max = 100)
+## CCA
+# Conduct CCA for each fish species
+for (i in 1:length(fish)) {
+  # Aggregate data based on groupings of explanatory variables
+  dietsp <- diet_join %>%
+    filter(Species == fish[i]) %>%
+    mutate(preytotal = select(., Centropages_spp:Unknown) %>% 
+             rowSums(na.rm = TRUE)) %>%
+    filter(preytotal != 0) # eliminate counts of zero
+  # Goal: Leave out prey categories that averaged less than 5% by number in the diet of each species
+  
+  # create vector of prey count totals per row
+  # convert counts to proportions
+  dietprop <- select(dietsp, Centropages_spp:Unknown)/dietsp$preytotal
+  dietprop[dietprop == "NaN"] <- 0
+  # transform proportions using arcsin
+  dietarc <- trans.arcsine(dietprop)
+  
+  # isolate predictors 
+  # "SURFTEMP","BOTTEMP" can be added in but NA's must be filtered
+  predictors <- subset(dietsp, select = predictor_cols)
+  
+  ## CCA model
+  # Make sure none of the columns contain one category (i.e. all Spring)
+  # create a "full" model with all predictors 
+  # y ~ x 
+  # the dot means "any columns from data that are otherwise not used"
+  # Note: none of the rowsums can equal zero
+  CCA_full <- cca(dietarc~., predictors)
+  # make a null model
+  CCA_null <- cca(dietarc~1,predictors)
+  # perform a stepwise selection of predictors through permuatation tests against the null model
+  CCA_final <- step(CCA_null, scope = formula(CCA_full), test = "perm", perm.max = 100)
+  
+  # plot the results
+  # https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/plot.cca
+  tiff(paste0("CCA_", fish[i], ".tiff"),width = 8, height = 6, res = 200, units = "in")
+  plot(CCA_final, display = c("sp","bp"))
+  dev.off() # returns the number and name of the new active device
+}
 
-# plot the results
-# https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/plot.cca
+# play around with output
+# plot(CCA_final, display = c("sp","bp"))
+# points(CCA_final, pch=19, col="black", bg="yellow", cex=1.2)
 
-plot(CCA_final, display = c("sp","bp"))
-# points(CCA_final, pch=21, col="red", bg="yellow", cex=1.2)
+# Summary output
 ## Limited output of 'summary'
 head(summary(CCA_final), tail=2)
-
-dev.off() # returns the number and name of the new active device
+## conduct an anova
 anova(CCA_final)
-# tiff("B_saida_CCA_190201.tiff",width = 8, height = 6, res = 200, units = "in")
 
-# I left out prey categories that averaged less than 5% by number in the diet of each species
 ```
 

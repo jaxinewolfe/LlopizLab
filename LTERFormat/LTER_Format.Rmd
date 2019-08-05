@@ -1,0 +1,101 @@
+---
+title: "LTER Single-Sheet Long-Format Data Processing Trial"
+author: "Jaxine Wolfe"
+date: "6/19/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+## Note: This script will output a summary sheet from the input of raw diet data
+
+# Load libraries
+library(tidyverse)
+
+```
+
+## R Markdown Setup
+
+```{r cars}
+
+# clear workspace for local development
+rm(list = ls())
+# Set working directory
+setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/LTERFormat")
+
+# Load trial stomach content data
+# Data is in long format
+sca <- read_csv("LTER_SCA_trialdata.csv")
+str(sca)
+
+```
+
+## Relative Abundance
+
+Generate plots of relative abundance for the trial data
+
+```{r}
+
+# these cruises will be looped over to produce plots for each cruise
+cruises <- unique(sca$Cruise)
+
+# sca_percent <- sca %>%
+#   filter(PreyCount != "NA") %>%
+#   group_by(FishSpecies) %>%
+#   mutate(PreyPercent = (PreyCount/sum(PreyCount))*100)
+
+for(i in 1:length(cruises)) {
+  sca_percent <- sca %>%
+    filter(PreyCount != "NA" & Cruise == cruises[i]) %>%
+    group_by(FishSpecies) %>%
+    mutate(PreyPercent = (PreyCount/sum(PreyCount))*100)
+  
+  ggplot(data = sca_percent, 
+         aes(FishSpecies, PreyPercent, fill = PreySpecies)) +
+    geom_col() +
+    # scale_fill_brewer(palette = "Set3", na.value = "grey50") +
+    labs(title = "Diet Composition Per Fish", x = "Fish Species", y = "Percent Composition") +
+    theme_classic()
+  
+  ggsave(paste0("RelAbund_", cruises[i], ".jpg"))
+}
+
+```
+
+## Mean Prey Size 
+
+```{r}
+
+fish <- unique(sca$FishSpecies)
+
+# Plotting mean prey length with standard error 
+sca_size <- sca %>%
+  filter(PreyNumber != "NA") %>%
+  group_by(FishSpecies) %>%
+  summarise(MeanSize = mean(Length_mm),
+            ymin = (mean(Length_mm) - sd(Length_mm)/sqrt(sum(!is.na(Length_mm)))),
+            ymax = (mean(Length_mm) + sd(Length_mm)/sqrt(sum(!is.na(Length_mm)))))
+
+for(i in 1:length(cruises)) {
+  ggplot(sca_size %>% filter(Cruise == cruises[i]), 
+         aes(x = FishSpecies, y = MeanSize)) + 
+    geom_point() +
+    geom_errorbar(aes(ymin = ymin, ymax = ymax), 
+                  data = sca_size) +
+    # geom_text_repel(aes(label=Season), size = 4) +
+    theme_classic() + labs(x = "Species", y = "Mean Prey Size")
+  
+  ggsave(paste0("MeanPreySize_", cruises[i], ".jpg"))
+}
+
+# Plotting prey length with boxplot
+# sca_box <- sca %>%
+#     filter(PreyNumber != "NA") %>%
+#     group_by(Cruise, Station, FishSpecies) %>%
+#     summarise(TotalCount = sum(count),
+#             PreyRichness = length(unique(preytype)))
+
+
+```
+

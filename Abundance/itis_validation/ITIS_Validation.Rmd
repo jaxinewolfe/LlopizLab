@@ -10,8 +10,8 @@ namespace_validation: This project uses an R Markdown file (ITIS_validation.Rmd)
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+library(tidyverse)
 library(taxize)
-# library(worrms)
 library(plyr)
 library(dplyr)
 # library(tcltk)
@@ -40,8 +40,9 @@ setwd(my_path)
 # helper functions used in script 
 ```{r}
 
-# wrapper function to call taxize get_wormsid function and put data into appropriate column
+# wrapper function to call taxize get_tsn function and put resolved id into appropriate column
 acquire_id <- function(resolved_name, counter, man.data) {
+  # get taxomonic serial number for the given name
   response <- taxize::get_tsn(
     resolved_name,
     searchtype = 'scientific',
@@ -55,54 +56,14 @@ acquire_id <- function(resolved_name, counter, man.data) {
     # standardize resolved name to retrieve id
     resolved_name <- gsub(" ", ".", resolved_name, fixed=TRUE)
     resolved_name <- gsub("-", ".", resolved_name, fixed=TRUE)
-    # get.id <- paste(resolved_name, sep='.', "ids") #?
     # Pull highest order taxon id
     resolved_id <- response$ids
+    # populate resolved_id_fromgnr
     man.data$resolved_id_fromgnr[counter] <<- resolved_id
-    # sets data_source column if original name could not be resolved through gnr 
-    man.data$data_source[counter] <<- "ITIS"
   } # else leaves columns with original NA values
 }
 
-
-# retrieves taxon information based on name
-name2taxoninfo <- function(tx_name, counter, man.data) {
-  # use itis db to get taxon level
-  taxon_level <- unlist(tax_rank(tx_name, db='itis', rows=1))
-  man.data$resolved_taxon_level_fromgnr[counter] <<- taxon_level
-  # use taxize classification function to get higher order (class, infraphylum, phylum)
-  hierarchy <- taxize::classification(tx_name, db='itis', rows=1)
-  # get class, infraphylum, and phylum
-  hierarchy <- as.data.frame(hierarchy[[1]])
-  genus <- hierarchy$name[hierarchy$rank == "genus"]
-  order <- hierarchy$name[hierarchy$rank == "order"]
-  class <- hierarchy$name[hierarchy$rank == "class"]
-  phylum <- hierarchy$name[hierarchy$rank == "phylum"]
-  
-  # check which of the main groups tx_name falls under and assign bins
-  if (!identical(character(0), class) && class == "Appendicularia") {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Appendicularian"
-  } else if (!identical(character(0), order) && order == "Amphipoda") {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Amphipod"
-  } else if (!identical(character(0), order) && order == "Euphausiacea") {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Krill"
-  } else if (!identical(character(0), phylum) && phylum == "Chaetognatha") {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Chaetognath"
-  } else if (!identical(character(0), order) && order == "Calanoida") {
-      if (!identical(character(0), genus) && genus == "Centropages") {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Centropages"
-      } else if (!identical(character(0), genus) && genus == "Calanus") {
-       man.data$resolved_higher_order_fromgnr[counter] <<- "Calanus"
-      } else {
-        man.data$resolved_higher_order_fromgnr[counter] <<- "Other Calanoids"
-      }
-  } else {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Other"
-    }
-}
-
-
-# retrieves taxon info based on id: level, name, and higher order 
+# wrapper function to call id2name and...retrieves taxon info based on id: level, name, and higher order 
 id2taxoninfo <- function(tsn, counter, man.data) {
   # populate taxon_level 
   taxon_level <- unlist(id2name(tsn, db = 'itis')[[1]]$rank)
@@ -111,43 +72,38 @@ id2taxoninfo <- function(tsn, counter, man.data) {
   # populate taxon_name
   taxon_name <- unlist(id2name(tsn, db = 'itis')[[1]]$name)
   man.data$taxon_name_fromid[counter] <<- taxon_name
-  # populate higher_order
+  # populate taxon_bins
   hierarchy <- as.data.frame(classification(tsn, db='itis', rows=1)[[1]])
-  # only set resolved id in the case that the resolved id doesn't exist yet
-  # if (is.na(man.data$resolved_higher_order_fromgnr[counter])) {
-  #   taxon_level <- tools::toTitleCase(taxon_level)
-  #   man.data$resolved_id_fromgnr[counter] <<- hierarchy$id[hierarchy$rank == taxon_level]
-  # }
-  # get genus, order,class, and phylum
+
+  # get genus, order, class, and phylum
   genus <- hierarchy$name[hierarchy$rank == "genus"]
   order <- hierarchy$name[hierarchy$rank == "order"]
   class <- hierarchy$name[hierarchy$rank == "class"]
   phylum <- hierarchy$name[hierarchy$rank == "phylum"]
   
-  # check which of the main groups tx_name falls under and assign bins
+  # check which of the main groups the taxa falls under and assign bins
   if (!identical(character(0), class) && class == "Appendicularia") {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Appendicularian"
+      man.data$taxon_bins[counter] <<- "Appendicularian"
   } else if (!identical(character(0), order) && order == "Amphipoda") {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Amphipod"
+      man.data$taxon_bins[counter] <<- "Amphipod"
   } else if (!identical(character(0), order) && order == "Euphausiacea") {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Krill"
+      man.data$taxon_bins[counter] <<- "Krill"
   } else if (!identical(character(0), phylum) && phylum == "Chaetognatha") {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Chaetognath"
+      man.data$taxon_bins[counter] <<- "Chaetognath"
   } else if (!identical(character(0), order) && order == "Calanoida") {
       if (!identical(character(0), genus) && genus == "Centropages") {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Centropages"
+      man.data$taxon_bins[counter] <<- "Centropages"
       } else if (!identical(character(0), genus) && genus == "Calanus") {
-       man.data$resolved_higher_order_fromgnr[counter] <<- "Calanus"
+       man.data$taxon_bins[counter] <<- "Calanus"
       } else {
-        man.data$resolved_higher_order_fromgnr[counter] <<- "Other Calanoids"
+        man.data$taxon_bins[counter] <<- "Other Calanoids"
       }
   } else {
-      man.data$resolved_higher_order_fromgnr[counter] <<- "Other"
+      man.data$taxon_bins[counter] <<- "Other"
     }
   
   # sets data_source column if original name could not be resolved through gnr 
-  # man.data$data_source[counter] <<- "World Register of Marine Species"
-  man.data$data_source[counter] <<- "ITIS"
+  # man.data$data_source[counter] <<- "ITIS"
 }
 
 # helper function to fill in information for abiotic classes
@@ -156,7 +112,7 @@ edge_case <- function(name, counter) {
      name == "Other"| name == "Unknown Soft" | 
      name == "Parasite" | is.na(name)) {
     man.data$data_source[counter] <<- "OCB"
-    man.data$resolved_higher_order_fromgnr[counter] <<- toString(name)
+    man.data$taxon_bins[counter] <<- toString(name)
     return(TRUE)
   }
   return(FALSE)
@@ -164,7 +120,7 @@ edge_case <- function(name, counter) {
 
 ```
 
-## Script for using taxize package
+## Revamping the for loop
 ```{r, echo=FALSE, include=FALSE}
 
 # manually added a preytype_validated column for ease of GNR
@@ -173,23 +129,16 @@ man.data <- read_csv("Llopiz_preytypes.csv")
 # Resolve names 
 counter <- 1
 # column names 
-# man.data$tsn_id <- NA_character_
 man.data$resolved_names <- NA_character_
+man.data$resolved_id_fromgnr <- NA_character_
+man.data$data_source <- NA_character_
 man.data$taxon_level_fromid <- NA_character_
 man.data$taxon_name_fromid <- NA_character_
-man.data$higher_order_fromid <- NA_character_
-man.data$data_source <- NA_character_
-man.data$resolved_id_fromgnr <- NA_character_
-man.data$resolved_taxon_level_fromgnr <- NA_character_
-man.data$resolved_higher_order_fromgnr <- NA_character_
+man.data$taxon_bins <- NA_character_
 man.data$name_match <- FALSE
-# man.data$id_match <- FALSE
-man.data$higher_match <- FALSE
-# man.data$alt_datasource <- NA_character_
-# man.data$alt_resolved_name <- NA_character_
 
 # reorder columns
-man.data[,c("preytype_validated", "resolved_names", "taxon_level_fromid", "taxon_name_fromid", "higher_order_fromid", "data_source", "resolved_id_fromgnr", "resolved_taxon_level_fromgnr", "resolved_higher_order_fromgnr", "name_match", "higher_match")] 
+man.data[,c("Llopiz_preytypes", "preytype_validated", "resolved_names", "resolved_id_fromgnr", "data_source", "taxon_level_fromid", "taxon_name_fromid", "taxon_bins", "name_match")] 
 
 # loop through all rows
 for (row in 1:nrow(man.data)) {
@@ -199,7 +148,7 @@ for (row in 1:nrow(man.data)) {
     counter <- counter + 1
     next
   }
-  # try to resolve the name with gnr
+  # Then try to resolve the name with gnr
   temp <- gnr_resolve(names = as.vector(man.data$preytype_validated[counter]), 
                       canonical = T, best_match_only = T, 
                       preferred_data_sources = c(3, 4)) 
@@ -210,110 +159,44 @@ for (row in 1:nrow(man.data)) {
   
   # set primary data source
   primary_ds <- "ITIS"
-  # check if able to resolve name 
+  
+  # Case: If gnr was able to resolve the name 
   if (!empty(temp)) {
-    # add to resolved_names column
-    resolved_name <- unlist(temp[1, 'matched_name2'])
-    man.data$resolved_names[counter] <- resolved_name
-    # add to data_source or alt_ds column
+    # populate resolved_names column
+    gnr_name <- unlist(temp[1, 'matched_name2'])
+    man.data$resolved_names[counter] <- gnr_name
+    # populate data_source column
     authority <- unlist(temp[1, 'data_source_title'])
-    # add to data_source if ITIS or alt_ds for other 
+    # if the authority agrees with the primary_ds, populate with primary source
     if (authority == primary_ds) {
       man.data$data_source[counter] <- authority
     } else {
+      # if the gnr source was not ITIS, populate with alternative source
       man.data$data_source[counter] <- authority
-      man.data$resolved_names[counter] <- resolved_name
+      man.data$resolved_names[counter] <- gnr_name
     }
     
-    # edge case: check if tsn_id does not exist in input file() taxon_level, name, higher order are false)
-    if (man.data$resolved_id_fromgnr[counter] == -999 | 
-        is.na(man.data$resolved_id_fromgnr[counter])) {
-      # call helper function to retrieve ID from resolved name 
-      acquire_id(resolved_name, counter, man.data)
-      # retrieve taxon level from resolved_name
-      name2taxoninfo(resolved_name, counter, man.data)
-      # higher_match, id_match, and name_match remain false as original ID did not exist
-    } 
-    # else tsn_id does exist in input file
-    else {
-      # set resolved_id from resolved_name
-      acquire_id(resolved_name, counter, man.data)
-      # call helper function to retrieve taxon info from resolved_name 
-      name2taxoninfo(resolved_name, counter, man.data)
-      # call helper function to retrieve taxon info from id
-      id2taxoninfo(man.data$resolved_id_fromgnr[counter], counter, man.data)
-      
-      # check if taxon name matches with resolved
-      if (man.data$taxon_name_fromid[counter] == man.data$resolved_names[counter]) {
-        # set name_match to true
-        man.data$name_match[counter] <- TRUE
-      }
-      # check if id matches with resolved
-      # if (man.data$tsn_id[counter] == man.data$resolved_id_fromgnr[counter]) {
-      #   # set id_match to true
-      #   man.data$id_match[counter] <- TRUE
-      # }
-      # check if higher order matches with resolved
-      if (man.data$higher_order_fromid[counter] == man.data$resolved_higher_order_fromgnr[counter]) {
-        man.data$higher_match[counter] <- TRUE
-      }
-    }
-  } else {
-    # case: gnr unable to resolve by name, fill with NA 
-    man.data$resolved_names[counter] <- NA_character_
+    # Use aquire_id to populate resolved_id_fromgnr using the gnr_name
+    acquire_id(gnr_name, counter, man.data)
+    # use id2taxoninfo to poplate taxon_level_fromid, taxon_name_fromid, and taxon_bins
+    id2taxoninfo(man.data$resolved_id_fromgnr[counter], counter, man.data)
 
-    # edge case: check if tsn_id is not empty for row 
-    if(!is.na(man.data$resolved_id_fromgnr[counter])) {
-      # fill in taxon info based on ID
-      id <- man.data$resolved_id_fromgnr[counter]
-      id2taxoninfo(id, counter, man.data)
-      # leave resolved information as NA and check match columns false
+    # check if taxon name matches with resolved
+    if (man.data$taxon_name_fromid[counter] == man.data$resolved_names[counter]) {
+      # set name_match to true
+      man.data$name_match[counter] <- TRUE
     }
-    # edge case: unable to resolve name and tsn_id does not exist 
-    else {
-      # check if id can be resolved with original, unresolved name
-      test_name <- man.data$preytype_validated[counter]
-      acquire_id(test_name, counter, man.data)
-      
-      # see if id was able to be resolved
-      if (!is.na(man.data$resolved_id_fromgnr[counter])) {
-        # fill in taxon info from id
-        id2taxoninfo(man.data$resolved_id_fromgnr[counter], counter, man.data)
-        # leave resolved information as NA and check match columns false
+    } else { 
+      # Case: GNR was unable to resolve by name, fill with NA
+      man.data$resolved_names[counter] <- NA_character_
       }
-      # unable to get id from original name 
-      else {
-        # fill ID with NA
-        man.data$resolved_id_fromgnr[counter] <- NA_character_
-      }
-    }
-  }
   counter <- counter + 1
 }
 
 # convert to csv file 
-write.csv(man.data, file.path("Llopiz_resolved.csv"))
+write.csv(man.data, file.path("Llopiz_resolved.csv"), row.names = FALSE)
 
 # isolate taxa classified as other to fact check
-# Llopiz_other <- Llopiz_resolved %>% filter(resolved_higher_order_fromgnr == "Other")
+Llopiz_other <- man.data %>% filter(taxon_bins == "Other")
 
 ```
-
-The is prep for relative prey abundance
-```{r}
-
-abundance_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/"
-
-# Load Justin's data
-diet_2013_2015 <- read_csv("Forage_Fish_Diet_Data_2013_2015_long.csv")
-# Isolate and clean preytype
-diet_2013_2015$preytype <- trimws(gsub('([[:upper:]])', ' \\1',
-                               diet_2013_2015$preytype))
-
-# merge data with ITIS resolved names and specified categorizations
-diet_all <- left_join(x = diet_2013_2015, y = man.data, 
-                          by=(c("preytype"="Llopiz_preytypes")))
-
-write.csv(diet_all, file.path(abundance_path, "NESLTER_Diet_Taxa_2013_2015.csv"))
-```
-
