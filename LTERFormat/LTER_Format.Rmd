@@ -5,6 +5,8 @@ date: "6/19/2019"
 output: html_document
 ---
 
+This project uses an R Markdown file (LTER_Format.Rmd) to load a single-sheet, long-format XLSX dataset containing prey count and size data for each fish dissected from the 201802 trawl survey. The data entered from this sheet have been validated in Microsoft Excel using a prey type lookup table adjacent to the raw data sheet. The output of this project generates plots of relative prey abundance and mean prey size for each fish and cruise.
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -12,90 +14,100 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Load libraries
 library(tidyverse)
+library(readxl)
 
 ```
 
-## R Markdown Setup
+## Setup
 
-```{r cars}
-
-# clear workspace for local development
-rm(list = ls())
-# Set working directory
-setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/LTERFormat")
-
-# Load trial stomach content data
-# Data is in long format
-sca <- read_csv("LTER_SCA_trialdata.csv")
-str(sca)
-
-```
-
-## Relative Abundance
-
-Generate plots of relative abundance for the trial data
+The trial diet data loaded was subset from the NOAA Fisheries 201802 cruise. The data was entered in single-sheet long-format entry with data validation of each prey item and contains both prey counts and size. Up to 10 individuals measured in each gut, indicated by the PreyNumber column, and the totals of each prey type per gut are included in the PreyCount column.    
 
 ```{r}
 
-# these cruises will be looped over to produce plots for each cruise
+# clear workspace for local development
+rm(list = ls())
+# set working directory
+setwd("/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/LTERformat")
+
+# Load trial stomach content data from excel sheet
+sca <- read_excel(path = "LTER_SCA_trialdata.xlsx", sheet = 1, na = "NA")
+# Clean the preytype column
+sca$PreySpecies <- trimws(gsub('([[:upper:]])', ' \\1', sca$PreySpecies))
+str(sca)
+
+## Link to ITIS-validated taxon bins
+# Merge taxa bins from resolved preytypes
+# valid_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/itis_validation"
+# # load resolved data
+# resolved_data <- read_csv(file.path(valid_path,"Llopiz_resolved.csv"))
+# 
+# # merge data with ITIS resolved names and specified categorizations
+# diet_all <- left_join(x = sca, y = resolved_data,
+#                           by=(c("PreySpecies"="Llopiz_preytypes")))
+
+```
+
+## Relative Prey Abundance
+
+This chunk loops through each cruise and performs an iterative analysis of relative prey abundance for each fish species. Figures are sequentially output within the working directory.
+
+```{r}
+
+# isolate unique cruises to be looped over
 cruises <- unique(sca$Cruise)
 
-# sca_percent <- sca %>%
-#   filter(PreyCount != "NA") %>%
-#   group_by(FishSpecies) %>%
-#   mutate(PreyPercent = (PreyCount/sum(PreyCount))*100)
-
+# loop through cruises
 for(i in 1:length(cruises)) {
   sca_percent <- sca %>%
     filter(PreyCount != "NA" & Cruise == cruises[i]) %>%
     group_by(FishSpecies) %>%
-    mutate(PreyPercent = (PreyCount/sum(PreyCount))*100)
-  
-  ggplot(data = sca_percent, 
-         aes(FishSpecies, PreyPercent, fill = PreySpecies)) +
+    mutate(PreyProp = PreyCount/sum(PreyCount))
+  # plot relative abundance for each fish within each cruise
+  p <- ggplot(data = sca_percent, 
+         aes(FishSpecies, PreyProp, fill = PreySpecies)) +
     geom_col() +
     # scale_fill_brewer(palette = "Set3", na.value = "grey50") +
-    labs(title = "Diet Composition Per Fish", x = "Fish Species", y = "Percent Composition") +
+    labs(title = "Diet Composition Per Fish", x = "Fish Species", y = "Proportion in Diet") +
     theme_classic()
-  
+  # save plot to working directory
   ggsave(paste0("RelAbund_", cruises[i], ".jpg"))
 }
-
+p
 ```
 
-## Mean Prey Size 
+### Mean Prey Size 
+
+This chunk performs an iterative analysis of mean prey length in the diets of each fish species. Figures are sequentially output within the working directory.
 
 ```{r}
 
 fish <- unique(sca$FishSpecies)
 
-# Plotting mean prey length with standard error 
+# summarize mean prey length with standard error 
 sca_size <- sca %>%
   filter(PreyNumber != "NA") %>%
-  group_by(FishSpecies) %>%
+  group_by(FishSpecies, PreySpecies) %>%
   summarise(MeanSize = mean(Length_mm),
             ymin = (mean(Length_mm) - sd(Length_mm)/sqrt(sum(!is.na(Length_mm)))),
             ymax = (mean(Length_mm) + sd(Length_mm)/sqrt(sum(!is.na(Length_mm)))))
 
-for(i in 1:length(cruises)) {
-  ggplot(sca_size %>% filter(Cruise == cruises[i]), 
-         aes(x = FishSpecies, y = MeanSize)) + 
-    geom_point() +
+# loop through all fish
+for(i in 1:length(fish)) {
+  # plot mean prey size for each fish within each cruise
+  p <- ggplot(sca_size %>% filter(FishSpecies == fish[i]), 
+         aes(x = PreySpecies, y = MeanSize)) + 
+    geom_col(position = position_dodge(), fill = "#66CCFF") +
     geom_errorbar(aes(ymin = ymin, ymax = ymax), 
-                  data = sca_size) +
+                  data = sca_size %>% filter(FishSpecies == fish[i]), 
+                  show.legend = FALSE, width = 0) +
     # geom_text_repel(aes(label=Season), size = 4) +
-    theme_classic() + labs(x = "Species", y = "Mean Prey Size")
-  
-  ggsave(paste0("MeanPreySize_", cruises[i], ".jpg"))
+    theme_classic() + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(title = paste0("Mean Prey Size for ", fish[i], " Gut Content"), 
+         x = "Prey Species", y = "Mean Size")
+
+  ggsave(paste0("MeanPreySize_", fish[i], ".jpg"))
 }
-
-# Plotting prey length with boxplot
-# sca_box <- sca %>%
-#     filter(PreyNumber != "NA") %>%
-#     group_by(Cruise, Station, FishSpecies) %>%
-#     summarise(TotalCount = sum(count),
-#             PreyRichness = length(unique(preytype)))
-
-
+p
 ```
 

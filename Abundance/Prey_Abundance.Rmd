@@ -5,18 +5,19 @@ date: "7/28/2019"
 output: html_document
 ---
 
+This project uses an R Markdown file to summarize and plot the relative prey abundance for fish species from each NES-LTER cruise. The resolved output from *ITIS_Validation.Rmd* is merged with 2013-2015 diet data to assign categorical bins to the prey types. The output of this project generates plots of relative prey abundance for each fish and cruise.  
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+# load libraries
 library(tidyverse)
+
 ```
 
-## R Markdown
-
-This file calculates the relative abundance for...
-
+### Prepare Local Environment
 ```{r}
-# local development only
+# clear global environment
 rm(list=ls())
 
 # set working directory
@@ -25,9 +26,9 @@ setwd(my_path)
 
 ```
 
-## Load Merged Data
+### Import Resolved NES-LTER Diet Data
 
-Note: this code will be updated shortly to include an ifelse statement that merges the diet and resolved taxa files if a merged file doesn't already exist.
+This chunk merges the diet and resolved taxa files from the itis_validation directory if a merged file doesn't already exist. 
 
 ```{r}
 
@@ -35,87 +36,89 @@ Note: this code will be updated shortly to include an ifelse statement that merg
 # if the file exists, load it
 if (file.exists("NESLTER_Diet_Taxa_2013_2015.csv")) {
   diet_all <- read_csv("NESLTER_Diet_Taxa_2013_2015.csv")
-  
-  } else { # if the file does NOT exist, merge the ITIS_Validation output
-  
+  # if the file does NOT exist, merge the ITIS_Validation.Rmd output
+  } else { 
   valid_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/itis_validation"
 
-  # Load Justin's data
-  diet_2013_2015 <- read_csv(file.path(valid_path,"Forage_Fish_Diet_Data_2013_2015_long.csv"))
-  # Isolate and clean preytype
+  # Load the diet data in long format
+  diet_2013_2015 <- read_csv("Forage_Fish_Diet_Data_2013_2015_long.csv")
+  # Clean the preytype column
   diet_2013_2015$preytype <- trimws(gsub('([[:upper:]])', ' \\1',
                                  diet_2013_2015$preytype))
   
-  # load resolved data
+  # load the ITIS_Validation.Rmd output
   resolved_data <- read_csv(file.path(valid_path,"Llopiz_resolved.csv"))
   
-  # merge data with ITIS resolved names and specified categorizations
+  # merge diet data with ITIS resolved names and specified categorizations
   diet_all <- left_join(x = diet_2013_2015, y = resolved_data,
                             by=(c("preytype"="Llopiz_preytypes")))
+  # write csv to the working directory
+  write.csv(diet_all, "NESLTER_Diet_Taxa_2013_2015.csv", row.names = FALSE)
 }
 
 ```
 
-## Relative Prey Abundance
+### Relative Prey Abundance
 
-This code produces a total relative prey abundance across individual cruises.
+This chunk loops through each cruise and performs an iterative analysis of relative prey abundance for each fish species. Figures are sequentially output within the working directory.
 
 ```{r}
 
-# Data is in long format
-
-# NOTE: The smallest individual unit is Cruise_Station_FishSpecies
-# These summary sheets can be exported as needed
-
-# Generate summary sheet with grand prey totals and richness
-
-# these cruises will be looped over to produce plots for each cruise
+# isolate unique cruises to be looped over
 cruises <- unique(diet_all$Cruise)
 
+# loop through cruises
 for(i in 1:length(cruises)) {
-  sca_percent <- diet_all %>%
+  # summarize prey proportions in the diet of each fish species
+  sca_prop <- diet_all %>%
     filter(Cruise == cruises[i]) %>%
     group_by(Species) %>%
-    mutate(PreyPercent = (count/sum(count))*100)
-  
-  ggplot(data = sca_percent, aes(Species, PreyPercent, fill = taxon_bins)) +
+    mutate(PreyProp = (count/sum(count)))
+  # plot relative abundance for each fish within each cruise
+  p <- ggplot(data = sca_prop, aes(Species, PreyProp, fill = taxon_bins)) +
     geom_col() +
     scale_fill_brewer(palette = "Set3", na.value = "grey50") +
-    labs(title = "Diet Composition Per Fish", x = "Fish Species", y = "Percent Composition") +
+    labs(title = "Diet Composition Per Fish", x = "Fish Species", y = "Proportion in Diet") +
     theme_classic()
-  
+  # save plot to working directory
   ggsave(paste0("RelAbund_", cruises[i], ".jpg"))
 }
-
+p
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### Prey Richness
 
-
-## Prey Richness
+This chunk loops through each cruise and performs an iterative analysis of prey richness for each fish species. Figures visualizing the distribution of prey richness and mean prey richness (with standard error) are sequentially output within the working directory.
 
 ```{r}
-## Prey Richness
+## Distribution of Prey Richness
+# isolate unique cruises to be looped over
+cruises <- unique(diet_all$Cruise)
 
-# Boxplot
+# summarize prey richness
 sca_summary <- diet_all %>%
     group_by(Cruise, Station, Species) %>%
     summarise(TotalCount = sum(count),
-            PreyRichness = length(unique(preytype)))
+              # count unique prey items per cruise/station/fish
+              PreyRichness = length(unique(preytype)))
   
 # loop through cruises
 for(i in 1:length(cruises)) {
-  ggplot(sca_summary %>% filter(Cruise == cruises[i]), 
-       aes(Species, PreyRichness)) +
+  # plot the distribution of prey richness for each fish within each cruise
+  p <- ggplot(sca_summary %>% filter(Cruise == cruises[i]), 
+       aes(Species, PreyRichness, fill = Species)) +
     geom_boxplot(alpha = 0.5) + 
     labs(x = "Species", y = "Prey Richness") +
-    theme_classic()
-  
-  ggsave(paste0("PreyRich_stdev_", cruises[i], ".jpg"))
+    theme_classic() +
+    theme(legend.position="none")
+  # save plot to working directory
+  ggsave(paste0("PreyRich_", cruises[i], ".jpg"))
 }
+p
 
-# Point with Standard Error
-sca_summary_sterr <- diet_all %>%
+## Mean Prey Richness
+# summarize mean prey richness with standard error
+sca_richness <- diet_all %>%
     group_by(Cruise, Station, Species) %>%
     summarise(TotalCount = sum(count),
               PreyRichness = length(unique(preytype))) %>%
@@ -126,16 +129,18 @@ sca_summary_sterr <- diet_all %>%
   
 # loop through cruises
 for(i in 1:length(cruises)) {
-  ggplot(sca_summary_sterr %>% filter(Cruise == cruises[i]), 
+  # plot mean prey richness for each fish within each cruise
+  p <- ggplot(sca_richness %>% filter(Cruise == cruises[i]), 
          aes(x = Species, y = MeanRichness)) + 
     geom_point() +
     geom_errorbar(aes(ymin = ymin, ymax = ymax), 
-                  data = sca_summary_sterr %>% filter(Cruise == cruises[i])) +
-    # geom_text_repel(aes(label=Season), size = 4) +
+                  data = sca_richness %>% filter(Cruise == cruises[i])) +
     theme_classic() + labs(x = "Species", y = "Mean Prey Richness")
-
-  ggsave(paste0("PreyRich_sterr_", cruises[i], ".jpg"))
+  # save plot to working directory
+  ggsave(paste0("MeanPreyRich_", cruises[i], ".jpg"))
 }
+p
+
 ```
 
 

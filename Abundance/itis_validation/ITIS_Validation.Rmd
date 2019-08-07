@@ -1,12 +1,13 @@
 ---
-title: "ITIS_validation"
-author: "Katherine Qi and Jaxine Wolfe"
+title: "ITIS Taxonomic Validation and Re-Classification"
+author: "Jaxine Wolfe and Katherine Qi"
 date: "7/28/2019"
 output: html_document
 ---
 
-namespace_validation: This project uses an R Markdown file (ITIS_validation.Rmd) to resolve and re-classisy given taxonomic groups to the ITIS database (primary) or NCBI (secondary). It generates an output csv file with the original and corrected information that can be manually edited for name space development for further analysis.
+This project uses an R Markdown file (ITIS_Validation.Rmd) modified from [GitHub: WoRMs namespace_validation](https://github.com/klqi/EDI-NES-LTER-2019/tree/master/namespace_validation) to resolve, validate, and re-classify given prey species.It generates an output .csv file with the original, corrected, and classified information, using the ITIS database (primary) or NCBI (secondary). 
 
+## R Markdown
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -17,19 +18,13 @@ library(dplyr)
 # library(tcltk)
 ```
 
-## R Markdown
-Set up taxonomy table built from inputted data set 
-Run functions first to be able to use them in script (last chunk)- clean up later
+## Setup
 
-Input requirements:
-csv table with all species names in a column "name" and their corresponding ids in a column "tsn_id"
+Input requirements: CSV table with all species names in a column "preytype_validated"
 
 ```{r}
 # local development only
 rm(list=ls())
-
-# man.data <- read.csv(file.choose())
-# man.data <- read.csv(tk_choose.files(caption = "Choose a .csv file to validate"))
 
 my_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/itis_validation"
 setwd(my_path)
@@ -37,7 +32,8 @@ setwd(my_path)
 ```
 
 
-# helper functions used in script 
+## Define Helper Functions used in Script 
+
 ```{r}
 
 # wrapper function to call taxize get_tsn function and put resolved id into appropriate column
@@ -53,7 +49,7 @@ acquire_id <- function(resolved_name, counter, man.data) {
   # check if name was able to return an id from itis
   response <- as.data.frame(response)
   if (!empty(response)) {
-    # standardize resolved name to retrieve id
+    # tandardize resolved name to retrieve id
     resolved_name <- gsub(" ", ".", resolved_name, fixed=TRUE)
     resolved_name <- gsub("-", ".", resolved_name, fixed=TRUE)
     # Pull highest order taxon id
@@ -63,7 +59,8 @@ acquire_id <- function(resolved_name, counter, man.data) {
   } # else leaves columns with original NA values
 }
 
-# wrapper function to call id2name and...retrieves taxon info based on id: level, name, and higher order 
+# wrapper function to call id2name and classification
+# retrieves taxon info based on id and bins taxa into specified categories
 id2taxoninfo <- function(tsn, counter, man.data) {
   # populate taxon_level 
   taxon_level <- unlist(id2name(tsn, db = 'itis')[[1]]$rank)
@@ -75,7 +72,7 @@ id2taxoninfo <- function(tsn, counter, man.data) {
   # populate taxon_bins
   hierarchy <- as.data.frame(classification(tsn, db='itis', rows=1)[[1]])
 
-  # get genus, order, class, and phylum
+  # get genus, order, class, and phylum from hierarchy
   genus <- hierarchy$name[hierarchy$rank == "genus"]
   order <- hierarchy$name[hierarchy$rank == "order"]
   class <- hierarchy$name[hierarchy$rank == "class"]
@@ -101,12 +98,11 @@ id2taxoninfo <- function(tsn, counter, man.data) {
   } else {
       man.data$taxon_bins[counter] <<- "Other"
     }
-  
-  # sets data_source column if original name could not be resolved through gnr 
+  # set data_source column if original name could not be resolved through gnr 
   # man.data$data_source[counter] <<- "ITIS"
 }
 
-# helper function to fill in information for abiotic classes
+# helper function to fill in information for unclassifiable preytypes
 edge_case <- function(name, counter) {
   if(name == "Fish Remains"|
      name == "Other"| name == "Unknown Soft" | 
@@ -120,15 +116,15 @@ edge_case <- function(name, counter) {
 
 ```
 
-## Revamping the for loop
+## ITIS Validation For Loop
+
 ```{r, echo=FALSE, include=FALSE}
 
-# manually added a preytype_validated column for ease of GNR
+# load preytype data
 man.data <- read_csv("Llopiz_preytypes.csv")
+# NOTE: manually added a preytype_validated column for ease of GNR
 
-# Resolve names 
-counter <- 1
-# column names 
+# add necessary column names and populate with NA 
 man.data$resolved_names <- NA_character_
 man.data$resolved_id_fromgnr <- NA_character_
 man.data$data_source <- NA_character_
@@ -140,15 +136,17 @@ man.data$name_match <- FALSE
 # reorder columns
 man.data[,c("Llopiz_preytypes", "preytype_validated", "resolved_names", "resolved_id_fromgnr", "data_source", "taxon_level_fromid", "taxon_name_fromid", "taxon_bins", "name_match")] 
 
+# set counter
+counter <- 1
 # loop through all rows
 for (row in 1:nrow(man.data)) {
-  # first check if name is abiotic
+  # first check if name is an edge case
   if (edge_case(man.data$preytype_validated[counter], counter)) {
     # skip to next row if true
     counter <- counter + 1
     next
   }
-  # Then try to resolve the name with gnr
+  # try to resolve the name with gnr
   temp <- gnr_resolve(names = as.vector(man.data$preytype_validated[counter]), 
                       canonical = T, best_match_only = T, 
                       preferred_data_sources = c(3, 4)) 
@@ -191,6 +189,7 @@ for (row in 1:nrow(man.data)) {
       man.data$resolved_names[counter] <- NA_character_
       }
   counter <- counter + 1
+  print(counter) # print progress
 }
 
 # convert to csv file 
