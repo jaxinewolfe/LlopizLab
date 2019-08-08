@@ -15,19 +15,14 @@ This project uses an R Markdown file (LTER_Format.Rmd) to load a single-sheet, l
   - readxl
 
 ### Files in Directory:
-
-*handwrittenSCA_6_17_2019SCan.pdf* is a scanned example of the handwritten diet data before its input into a spreadsheet
+- *handwrittenSCA_6_17_2019SCan.pdf* is a scanned example of the handwritten diet data before its input into a spreadsheet
 
 **Scripts:**
-
-*LTER_Format.Rmd* is the active R Markdown script used to produce the relative prey abundance and mean prey size figures for fish species from each cruise
+- *LTER_Format.Rmd* is the active R Markdown script used to produce the relative prey abundance and mean prey size figures for fish species from each cruise
 
 **Input:**
-
-*LTER_SCA_trialdata.xslx* input file which contains NES-LTER fish stomach content data with prey counts and lengths
+- *LTER_SCA_trialdata.xslx* input file which contains NES-LTER fish stomach content data with prey counts and lengths
 
 **Output:**
-
-*RelAbund_Cruise.pdf* are the relative abundance figures output from * LTER_Format.Rmd*
-
-*MeanPreySize_fish.pdf* are the mean prey size figures output from *LTER_Format.Rmd* for each fish species
+- *RelAbund_Cruise.pdf* are the relative abundance figures output from *LTER_Format.Rmd*
+- *MeanPreySize_fish.pdf* are the mean prey size figures output from *LTER_Format.Rmd* for each fish species

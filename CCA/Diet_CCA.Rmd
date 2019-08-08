@@ -11,7 +11,7 @@ Input files:
 Output files:
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 # load necessary libraries
 library(tidyverse)
@@ -65,7 +65,6 @@ for (i in 2:length(file_list)){
   rm(temp_dataset)
 }
 
-str(FSCSdataset)
 # set surface/bottom temp to numeric type 
 FSCSdataset$SURFTEMP <- as.numeric(FSCSdataset$SURFTEMP)
 FSCSdataset$BOTTEMP <- as.numeric(FSCSdataset$BOTTEMP)
@@ -75,7 +74,6 @@ FSCSdataset$BOTTEMP <- as.numeric(FSCSdataset$BOTTEMP)
 dietdata <- read_csv("Forage_Fish_Diet_Data_2013_2015_wide.csv")
 dietdata[is.na(dietdata)] <- 0 # convert empties to 0
 
-# str(dietdata)
 ```
 
 ## Merging Diet Data with Explanatory Variables from Fisheries Data
@@ -153,11 +151,6 @@ if (!file.exists("NESLTER_2013_2015_diet.csv")) {
 
 ## Canonical Correspondence Analysis
 
-Modifications:
-1) exlude preytypes consisting of <1% (per gut or per species?)
-2) exclude other and unknown
-3) perform analysis
-
 ```{r}
 
 # function will perform a transformation which is common in diet studies 
@@ -172,20 +165,39 @@ predictor_cols <- c("Region","day_night","seasons","Station_Depth", "SURFTEMP","
 diet_join <- diet_join %>% filter(!is.na(SURFTEMP) & !is.na(BOTTEMP))
 
 # isolate unique fish species to be looped over
+cruises <- unique(diet_join$Cruise)
+# isolate unique fish species to be looped over
 fish <- unique(diet_join$Species)
+# isolate unique prey species
+diet_long <- diet_join %>%
+  gather(preytype, count, Centropages_spp:Unknown)
+species <- unique(diet_long$preytype)
 
 # loop through fish species
 # run CCA and plot a figure based on the model output
 for (i in 1:length(fish)) {
+  diet_include <- diet_join %>%
+    # exlude preytypes consisting of <1% (per species per cruise)
+    filter(Species == fish[i]) %>%
+    gather(preytype, count, species) %>%
+    group_by(preytype) %>%
+    summarise(preytotal = sum(count)) %>%
+    mutate(preyprop = preytotal/sum(preytotal)) %>%
+    filter(preyprop > 0.01) %>%
+    filter(preytype != "Unknown" & preytype != "Other") 
+  # save preytypes above/below 1% threshold for reference
+  prey_inside <- unique(diet_include$preytype)
+  prey_outside <- species[!(species %in% diet_include$preytype)]
+  
   # summarize total prey counts per fish gut
   dietsp <- diet_join %>%
     filter(Species == fish[i]) %>%
-    mutate(preytotal = select(., Centropages_spp:Unknown) %>% 
-             rowSums(na.rm = TRUE)) %>%
+    select(-prey_outside) %>% # eliminate preytypes below 1% threshold
+    mutate(preytotal = select(., prey_inside) %>% rowSums(na.rm = TRUE)) %>%
     filter(preytotal != 0) # eliminate counts of zero
   
   # isolate prey columns and convert counts to proportions
-  dietprop <- select(dietsp, Centropages_spp:Unknown)/dietsp$preytotal
+  dietprop <- select(dietsp, prey_inside)/dietsp$preytotal
   dietprop[dietprop == "NaN"] <- 0
   # transform proportions using trans.arcsine function
   dietarc <- trans.arcsine(dietprop)
@@ -205,24 +217,24 @@ for (i in 1:length(fish)) {
   CCA_null <- cca(dietarc~1,predictors)
   # perform a stepwise selection of predictors through permuatation tests against the null model
   CCA_final <- step(CCA_null, scope = formula(CCA_full), test = "perm", perm.max = 100)
-  
+
   # prepare to save plots to working directory
-  tiff(paste0("CCA_", fish[i], ".tiff"),width = 8, height = 6, res = 200, units = "in")
+  tiff(paste0("CCA_", fish[i], ".tiff"),
+       width = 8, height = 6, res = 200, units = "in")
   # plot the results
   # https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/plot.cca
-  plot(CCA_final, display = c("sp","bp"))
+  plot(CCA_final, display = c("sp","bp"),
+       main = paste0("CCA for ", fish[i]))
   dev.off() # shuts down current device
 }
-plot(CCA_final, display = c("sp","bp"))
-# play around with output
-# plot(CCA_final, display = c("sp","bp"))
-# points(CCA_final, pch=19, col="black", bg="yellow", cex=1.2)
+plot(CCA_final, display = c("sp","bp"),
+       main = paste0("CCA for ", fish[5]))
 
 ## Summary output
 # Limited output of 'summary'
 # head(summary(CCA_final), tail=2)
 # conduct an anova
-# anova(CCA_final)
+anova(CCA_final)
 
 ```
 

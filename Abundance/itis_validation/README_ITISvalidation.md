@@ -21,21 +21,15 @@ This project uses an R Markdown file (ITIS_Validation.Rmd) modified from [GitHub
 ### Files in Directory:
 
 **Scripts:**
-
-*ITIS_Validation.Rmd* is the active R Markdown script used to query the global name resolver and ITIS to procure valid classifications for input names and bin taxa
-
-*unique_preytypes.R* is a script that produces a vector of unique Llopiz prey type classifications
+- *ITIS_Validation.Rmd* is the active R Markdown script used to query the global name resolver and ITIS to procure valid classifications for input names and bin taxa
+- *unique_preytypes.R* is a script that produces a vector of unique Llopiz prey type classifications
 
 **Input:**
-
-*LTER201802_StomachData_LTERFFSizes.csv* is input for *unique_preytypes.R*, which contains NES-LTER fish stomach content data in long format and is used to isolate unique prey types. This CSV is the first sheet of an original XSLX spreadsheet.
-
-*Forage_Fish_Diet_Data_2013_2015_wide.csv* is input for *unique_preytypes.R*, which will be converted to long format for the purpose of this project 
-
-*Llopiz_preytypes.csv* contains the unique Llopiz prey type classifications output from *unique_preytypes.R*, which is input to *ITIS_Validation.Rmd*. (NOTE: This file was manually appended to include a column of prey types that were acceptable for ITIS and the global name resolver utilized by *ITIS_Validation.Rmd*)
+- *LTER201802_StomachData_LTERFFSizes.csv* is input for *unique_preytypes.R*, which contains NES-LTER fish stomach content data in long format and is used to isolate unique prey types. This CSV is the first sheet of an original XSLX spreadsheet.
+- *Forage_Fish_Diet_Data_2013_2015_wide.csv* is input for *unique_preytypes.R*, which will be converted to long format for the purpose of this project 
+- *Llopiz_preytypes.csv* contains the unique Llopiz prey type classifications output from *unique_preytypes.R*, which is input to *ITIS_Validation.Rmd*. (NOTE: This file was manually appended to include a column of prey types that were acceptable for ITIS and the global name resolver utilized by *ITIS_Validation.Rmd*)
 
 **Output:**
-
-*Llopiz_resolved.csv* is the file of validated prey types produced by *ITIS_Validation.Rmd*, which is merged with diet data and used to generate relative prey abundance (see *NESLTER_Diet_Taxa_2013_2015.csv* in the Abundance directory)
+- *Llopiz_resolved.csv* is the file of validated prey types produced by *ITIS_Validation.Rmd*, which is merged with diet data and used to generate relative prey abundance (see *NESLTER_Diet_Taxa_2013_2015.csv* in the Abundance directory)
 
 

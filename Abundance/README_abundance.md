@@ -18,20 +18,16 @@ This project uses an R Markdown file (Prey_Abundance.Rmd) to summarize and plot 
   - tidyverse
 
 ### Files in Directory:
-
-*itis_validation* is a folder containing the components used to resolve and validate the assigned prey types with ITIS
+- *itis_validation* is a folder containing the components used to resolve and validate the assigned prey types with ITIS
 
 **Scripts:**
-
-*Prey_Abundance.Rmd* is the active R Markdown script used to produce the relative prey abundance figures for fish species from each cruise
+- *Prey_Abundance.Rmd* is the active R Markdown script used to produce the relative prey abundance figures for fish species from each cruise
 
 **Input:** 
-
-*NESLTER_Diet_Taxa_2013_2015.csv* is the file output by *itis_validation* which contains NES-LTER fish stomach content data merged with taxonomic information used to bin prey types
+- *NESLTER_Diet_Taxa_2013_2015.csv* is the file output by *itis_validation* which contains NES-LTER fish stomach content data merged with taxonomic information used to bin prey types
 
 ** Output:**
-
-*RelAbund_Cruise.pdf* are the relative abundance figures output from *Prey_Abundance.Rmd*
+- *RelAbund_Cruise.pdf* are the relative abundance figures output from *Prey_Abundance.Rmd*
 
 **Workflow:** (in progress)
 - a Llopiz prey type list is assembled in R (combine Justin-long format- and Sarahs data sheets)

@@ -1,5 +1,5 @@
 ---
-title: "Relative Prey Abundance in the Gut Content of Small Pelagic Fish along the Northeast Shelf"
+title: "Relative Prey Abundance in the Gut Content of Small Pelagic Fish along the Northeast U.S. Shelf"
 author: "Jaxine Wolfe"
 date: "7/28/2019"
 output: html_document
@@ -7,8 +7,8 @@ output: html_document
 
 This project uses an R Markdown file to summarize and plot the relative prey abundance for fish species from each NES-LTER cruise. The resolved output from *ITIS_Validation.Rmd* is merged with 2013-2015 diet data to assign categorical bins to the prey types. The output of this project generates plots of relative prey abundance for each fish and cruise.  
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 # load libraries
 library(tidyverse)
@@ -17,6 +17,7 @@ library(tidyverse)
 
 ### Prepare Local Environment
 ```{r}
+
 # clear global environment
 rm(list=ls())
 
@@ -78,7 +79,8 @@ for(i in 1:length(cruises)) {
   p <- ggplot(data = sca_prop, aes(Species, PreyProp, fill = taxon_bins)) +
     geom_col() +
     scale_fill_brewer(palette = "Set3", na.value = "grey50") +
-    labs(title = "Diet Composition Per Fish", x = "Fish Species", y = "Proportion in Diet") +
+    labs(title = paste0("Diet Composition Per Fish for Cruise ", cruises[i]), 
+         x = "Fish Species", y = "Proportion in Diet") +
     theme_classic()
   # save plot to working directory
   ggsave(paste0("RelAbund_", cruises[i], ".jpg"))

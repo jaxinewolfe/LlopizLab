@@ -20,25 +20,19 @@ This project uses an R Markdown file (CCA_Diet.Rmd) to conduct a canonical corre
   - maptools
 
 ### Files in Directory:
+- *FSCSTables_SVSTA* is a folder accessed by *CCA_Diet.Rmd* which contains spreadsheet documentation of Spring and Fall NOAA Fisheries cruises
 
-*FSCSTables_SVSTA* is a folder accessed by *CCA_Diet.Rmd* which contains spreadsheet documentation of Spring and Fall NOAA Fisheries cruises
-
-*map_Walsh_etal_2015_NE_Regions.png* is a map of the Fisheries stratum zonation of the Northeast Shelf
+- *map_Walsh_etal_2015_NE_Regions.png* is a map of the Fisheries stratum zonation of the Northeast Shelf
 
 **Scripts:**
-
-*CCA_Diet.Rmd* is the active R Markdown script used to produce the CCA for each cruise
+- *CCA_Diet.Rmd* is the active R Markdown script used to produce the CCA for each cruise
 
 **Input:**
-
-*Forage_Fish_Diet_Data_2013_2015_wide.csv* input file which contains NES-LTER fish stomach content data in wide format
+- *Forage_Fish_Diet_Data_2013_2015_wide.csv* input file which contains NES-LTER fish stomach content data in wide format
 
 **Output:**
-
-*NESLTER_2013_2015_diet.csv* output file which contains the fish diet dataset with added columns for date, time, day_night, season, and other explanatory variables for CCA
-
-*FISHERIES_MIA.csv* output file which contains a subset of the 2013-2015 fish diet dataset where there were no corresponding stations in the fisheries dataset
-
-*CCA_fish.pdf* are the CCA figures output from *CCA_Diet.Rmd* for each fish species
+- *NESLTER_2013_2015_diet.csv* output file which contains the fish diet dataset with added columns for date, time, day_night, season, and other explanatory variables for CCA
+- *FISHERIES_MIA.csv* output file which contains a subset of the 2013-2015 fish diet dataset where there were no corresponding stations in the fisheries dataset
+- *CCA_fish.pdf* are the CCA figures output from *CCA_Diet.Rmd* for each fish species
 
 

@@ -34,9 +34,6 @@ rm(list=ls())
 my_path <- "/Users/jaxinewolfe/Documents/Research/PEP/NESLTER/Data/LlopizLab/Abundance/itis_validation"
 setwd(my_path)
 
-noaa_data <- read_csv("classify_NOAA_sample.csv")
-unique(noaa_data)
-
 ```
 
 
@@ -128,7 +125,7 @@ edge_case <- function(name, counter) {
 ## Revamping the for loop
 ```{r, echo=FALSE, include=FALSE}
 
-man.data <- read_csv("classify_NOAA_sample.csv")
+man.data <- read_csv("NOAA_taxasample.csv")
 
 # Resolve names 
 counter <- 1

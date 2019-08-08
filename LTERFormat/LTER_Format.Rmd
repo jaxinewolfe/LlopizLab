@@ -8,7 +8,7 @@ output: html_document
 This project uses an R Markdown file (LTER_Format.Rmd) to load a single-sheet, long-format XLSX dataset containing prey count and size data for each fish dissected from the 201802 trawl survey. The data entered from this sheet have been validated in Microsoft Excel using a prey type lookup table adjacent to the raw data sheet. The output of this project generates plots of relative prey abundance and mean prey size for each fish and cruise.
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 ## Note: This script will output a summary sheet from the input of raw diet data
 
@@ -18,7 +18,7 @@ library(readxl)
 
 ```
 
-## Setup
+### Setup
 
 The trial diet data loaded was subset from the NOAA Fisheries 201802 cruise. The data was entered in single-sheet long-format entry with data validation of each prey item and contains both prey counts and size. Up to 10 individuals measured in each gut, indicated by the PreyNumber column, and the totals of each prey type per gut are included in the PreyCount column.    
 
@@ -47,7 +47,7 @@ str(sca)
 
 ```
 
-## Relative Prey Abundance
+### Relative Prey Abundance
 
 This chunk loops through each cruise and performs an iterative analysis of relative prey abundance for each fish species. Figures are sequentially output within the working directory.
 
@@ -67,7 +67,8 @@ for(i in 1:length(cruises)) {
          aes(FishSpecies, PreyProp, fill = PreySpecies)) +
     geom_col() +
     # scale_fill_brewer(palette = "Set3", na.value = "grey50") +
-    labs(title = "Diet Composition Per Fish", x = "Fish Species", y = "Proportion in Diet") +
+    labs(title = paste0("Diet Composition Per Fish for Cruise ", cruises[i]), 
+         x = "Fish Species", y = "Proportion in Diet") +
     theme_classic()
   # save plot to working directory
   ggsave(paste0("RelAbund_", cruises[i], ".jpg"))
